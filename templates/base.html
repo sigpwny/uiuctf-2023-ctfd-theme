@@ -35,20 +35,12 @@
   {{ Configs.theme_header }}
 </head>
 <body>
-{% include "components/navbar.html" %}
 
 <main role="main">
   {% block content %}
   {% endblock %}
 </main>
 
-<footer class="footer">
-  <div class="container text-center">
-    <a href="https://ctfd.io" class="text-secondary">
-      <small class="text-muted">Powered by CTFd</small>
-    </a>
-  </div>
-</footer>
 
 {% include "components/notifications.html" %}
 

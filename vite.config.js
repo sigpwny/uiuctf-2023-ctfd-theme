@@ -39,6 +39,10 @@ export default defineConfig({
               src: "./assets/img/**",
               dest: "static/img",
             },
+            {
+              src: "./assets/windows-95-ui-kit/**",
+              dest: "static/windows-95-ui-kit",
+            },
           ],
           hook: "writeBundle",
         }),
