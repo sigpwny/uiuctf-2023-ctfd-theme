@@ -37,6 +37,22 @@
       "assets/js/index.js"
     ]
   },
+  "assets/js/login.js": {
+    "file": "assets/login.4ee6bb1a.js",
+    "src": "assets/js/login.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/register.js": {
+    "file": "assets/register.28f90592.js",
+    "src": "assets/js/register.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
   "assets/js/scoreboard.js": {
     "file": "assets/scoreboard.ecc930d6.js",
     "src": "assets/js/scoreboard.js",
@@ -140,7 +156,7 @@
     ]
   },
   "assets/scss/main.scss": {
-    "file": "assets/main.0aaf0d88.css",
+    "file": "assets/main.decff56c.css",
     "src": "assets/scss/main.scss",
     "isEntry": true
   }
