@@ -33,14 +33,17 @@
   </script>
 
   {{ Configs.theme_header }}
+  {% block head %}
+  {% endblock %}
 </head>
 <body>
 
+{% block page %}
 <main role="main">
   {% block content %}
   {% endblock %}
 </main>
-
+{% endblock %}
 
 {% include "components/notifications.html" %}
 
