@@ -2636,12 +2636,12 @@ button.section-black:focus {
 
 .btn {
   position: relative;
-  transition: all 0.2s ease;
   letter-spacing: 0.025em;
   font-size: 0.6rem;
   border-radius: 0.125rem;
   padding: 0.6rem 2rem;
   max-height: 37px;
+  transition: none !important;
 }
 
 .btn:before,
@@ -2826,42 +2826,60 @@ button.section-black:focus {
   height: 2rem;
 }
 
-.btn-primary {
-  color: #000;
+.btn-primary,
+.btn-primary:hover {
+  color: #000000;
   background-color: #c0c0c0;
-  border-color: #a0a0a0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  box-shadow: none;
+  border-radius: 0px !important;
 }
 
-.btn-primary:hover {
-  color: #000;
-  background-color: #c0c0c0;
-  border-color: #a0a0a0;
+.btn-primary:active,
+.btn-primary.active,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active {
+  color: #000000;
+  background-color: #c0c0c0c0;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  box-shadow: none;
+  border-radius: 0px !important;
+}
+
+.btn-primary:active > *,
+.btn-primary.active > * {
+  position: relative;
+  top: 1px;
+  left: 1px;
 }
 
 .btn-primary:focus,
-.btn-primary.focus {
+.btn-primary.focus,
+.show > .btn-primary.dropdown-toggle,
+.btn-primary:not(:disabled):not(.disabled):active:focus,
+.btn-primary:not(:disabled):not(.disabled).active:focus,
+.show > .btn-primary.dropdown-toggle:focus {
+  color: #000000;
+  background-color: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
   box-shadow: none;
+  border-radius: 0px !important;
 }
 
 .btn-primary.disabled,
 .btn-primary:disabled {
-  color: #000;
+  color: #000000;
   background-color: #c0c0c0;
   border-color: #c0c0c0;
-}
-
-.btn-primary:not(:disabled):not(.disabled):active,
-.btn-primary:not(:disabled):not(.disabled).active,
-.show > .btn-primary.dropdown-toggle {
-  color: #000;
-  background-color: #c0c0c0;
-  border-color: #c0c0c0;
-}
-
-.btn-primary:not(:disabled):not(.disabled):active:focus,
-.btn-primary:not(:disabled):not(.disabled).active:focus,
-.show > .btn-primary.dropdown-toggle:focus {
-  box-shadow: none;
 }
 
 .btn-secondary {
@@ -3799,10 +3817,6 @@ button.section-black:focus {
  * = Close
  */
 
-.close {
-  transition: all 0.2s ease;
-}
-
 .close > span:not(.sr-only) {
   display: block;
   height: 1.25rem;
@@ -3812,7 +3826,6 @@ button.section-black:focus {
   line-height: 17px;
   border-radius: 50%;
   font-size: 1.25rem;
-  transition: all 0.2s ease;
 }
 
 .close:hover,
@@ -3906,13 +3919,18 @@ label {
 }
 
 .form-control,
-.form-control:focus {
+.form-control:focus,
+input[type="text"] {
   font-size: 0.6rem;
-  color: black;
-  padding: 0.3rem;
-  border-color: #4a4a4a;
+  color: #000000;
   box-shadow: none;
   border-radius: 0;
+  border-top: 2px solid #000000;
+  border-left: 2px solid #000000;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  padding: 0.375rem;
+  transition: none;
 }
 
 .form-group-input {
@@ -4297,7 +4315,6 @@ textarea[resize="horizontal"] {
   left: 3px;
   bottom: 3px;
   background-color: #ffffff;
-  transition: all 0.3s ease-in-out;
 }
 
 .custom-toggle-slider.rounded-toggle {
@@ -4821,7 +4838,6 @@ textarea[resize="horizontal"] {
 .input-group {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
   border-radius: 0.125rem;
-  transition: all 0.2s ease;
 }
 
 .input-group .form-control {
@@ -4844,7 +4860,6 @@ textarea[resize="horizontal"] {
 
 .input-group-text {
   font-size: 0.875rem;
-  transition: all 0.3s ease-in-out;
 }
 
 .input-group-prepend {
