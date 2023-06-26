@@ -40,6 +40,10 @@ export default defineConfig({
               dest: "static/img",
             },
             {
+              src: "./assets/custom/**",
+              dest: "static/custom",
+            },
+            {
               src: "./assets/windows-95-ui-kit/**",
               dest: "static/windows-95-ui-kit",
             },
