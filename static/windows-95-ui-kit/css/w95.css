@@ -1667,8 +1667,7 @@ button.section-black:focus {
   padding-bottom: 0px;
   font-weight: bold;
   background-color: #ffffff;
-  background-image:
-    linear-gradient(45deg, #c0c0c0 25%, transparent 25%),
+  background-image: linear-gradient(45deg, #c0c0c0 25%, transparent 25%),
     linear-gradient(-45deg, #c0c0c0 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #c0c0c0 75%),
     linear-gradient(-45deg, transparent 75%, #c0c0c0 75%);
@@ -2844,10 +2843,10 @@ button.section-black:focus {
 .btn-primary:not(:disabled):not(.disabled).active {
   color: #000000;
   background-color: #c0c0c0c0;
-  border-top: 2px solid #808080;
-  border-left: 2px solid #808080;
-  border-right: 2px solid #808080;
-  border-bottom: 2px solid #808080;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
   box-shadow: none;
   border-radius: 0px !important;
 }
