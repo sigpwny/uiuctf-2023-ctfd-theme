@@ -2844,10 +2844,10 @@ button.section-black:focus {
 .btn-primary:not(:disabled):not(.disabled).active {
   color: #000000;
   background-color: #c0c0c0c0;
-  border-top: 2px solid #808080;
-  border-left: 2px solid #808080;
-  border-right: 2px solid #808080;
-  border-bottom: 2px solid #808080;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
   box-shadow: none;
   border-radius: 0px !important;
 }
