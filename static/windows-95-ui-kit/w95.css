@@ -1667,8 +1667,7 @@ button.section-black:focus {
   padding-bottom: 0px;
   font-weight: bold;
   background-color: #ffffff;
-  background-image:
-    linear-gradient(45deg, #c0c0c0 25%, transparent 25%),
+  background-image: linear-gradient(45deg, #c0c0c0 25%, transparent 25%),
     linear-gradient(-45deg, #c0c0c0 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #c0c0c0 75%),
     linear-gradient(-45deg, transparent 75%, #c0c0c0 75%);
