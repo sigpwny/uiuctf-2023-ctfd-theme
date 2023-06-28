@@ -10,7 +10,8 @@ class Pane {
     if (!params.name) throw new Error("Pane must have a name");
     if (!params.desktop) throw new Error("Pane must be linked to a Desktop");
     if (!params.title) throw new Error("Pane must have a title");
-    if (!params.initial_body_elem) throw new Error("Pane must have initial body element");
+    if (!params.initial_body_elem)
+      throw new Error("Pane must have initial body element");
     this.name = params.name;
     this.desktop = params.desktop;
     this.title = params.title;
@@ -25,7 +26,8 @@ class Pane {
     this.#createPaneDOM();
 
     // Dynamic attributes
-    this.transform = params.transform ?? `translate(${params.x ?? 0}px, ${params.y ?? 0}px)`;
+    this.transform =
+      params.transform ?? `translate(${params.x ?? 0}px, ${params.y ?? 0}px)`;
     this.z = params.z ?? 0;
     this.width = params.width ?? null;
     this.height = params.height ?? null;
@@ -53,7 +55,9 @@ class Pane {
     this.#registerListeners();
     this.#commitDOM();
     if (this.transform === "center") {
-      this.transform = `translate(${(this.desktop.elem.offsetWidth - this.target.offsetWidth) / 2}px, ${(this.desktop.elem.offsetHeight - this.target.offsetHeight) / 2}px)`;
+      this.transform = `translate(${
+        (this.desktop.elem.offsetWidth - this.target.offsetWidth) / 2
+      }px, ${(this.desktop.elem.offsetHeight - this.target.offsetHeight) / 2}px)`;
     }
     this.render();
   }
@@ -76,7 +80,10 @@ class Pane {
     // Create handle
     const pane_handle = document.createElement("div");
     pane_handle.setAttribute("x-ref", xref_target_handle);
-    pane_handle.setAttribute("class", "card-header d-flex flex-row justify-content-between align-items-center");
+    pane_handle.setAttribute(
+      "class",
+      "card-header d-flex flex-row justify-content-between align-items-center"
+    );
     const pane_title = document.createElement("div");
     pane_title.setAttribute("class", "card-header-content");
     // TODO: Icon
@@ -87,15 +94,20 @@ class Pane {
     const pane_controls = document.createElement("div");
     pane_controls.setAttribute("class", "d-flex flex-row");
     if (!this.hide_minimize) {
-      pane_controls.insertAdjacentHTML("beforeend", `
+      pane_controls.insertAdjacentHTML(
+        "beforeend",
+        `
         <div class="pane-control-icon" x-ref="minimize">
           <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/minimize.png">
           <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/minimize_pressed.png">
         </div>
-      `)
+      `
+      );
     }
     if (!this.hide_maximize) {
-      pane_controls.insertAdjacentHTML("beforeend", `
+      pane_controls.insertAdjacentHTML(
+        "beforeend",
+        `
         <span x-ref="maximize-restore-group">
           <div class="pane-control-icon" x-ref="maximize">
             <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/maximize.png" alt="">
@@ -106,15 +118,19 @@ class Pane {
             <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/restore_pressed.png" alt="">
           </div>
         </span>
-      `)
+      `
+      );
     }
     if (!this.hide_close) {
-      pane_controls.insertAdjacentHTML("beforeend", `
+      pane_controls.insertAdjacentHTML(
+        "beforeend",
+        `
         <div class="pane-control-icon close-icon" x-ref="close">
           <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
           <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
         </div>
-      `)
+      `
+      );
     }
     pane_handle.appendChild(pane_controls);
     pane_elem.appendChild(pane_handle);
@@ -189,36 +205,36 @@ class Pane {
       this.desktop.save();
     });
     // Minimize buttons
-    this.target.querySelectorAll("div[x-ref='minimize']").forEach(
-      elem => elem.addEventListener("click", (event) => {
+    this.target.querySelectorAll("div[x-ref='minimize']").forEach(elem =>
+      elem.addEventListener("click", event => {
         this.setMinimized(true);
         event.stopImmediatePropagation();
       })
-    )
+    );
     // Maximize buttons
-    this.target.querySelectorAll("div[x-ref='maximize']").forEach(
-      elem => elem.addEventListener("click", (event) => {
+    this.target.querySelectorAll("div[x-ref='maximize']").forEach(elem =>
+      elem.addEventListener("click", event => {
         this.setMaximized(true);
         event.stopImmediatePropagation();
       })
-    )
+    );
     // Restore buttons
-    this.target.querySelectorAll("div[x-ref='restore']").forEach(
-      elem => elem.addEventListener("click", (event) => {
+    this.target.querySelectorAll("div[x-ref='restore']").forEach(elem =>
+      elem.addEventListener("click", event => {
         this.setMaximized(false);
         this.desktop.bringToFront(this.target);
         event.stopImmediatePropagation();
       })
-    )
+    );
     // Close buttons
-    this.target.querySelectorAll("[x-ref='close']").forEach(
-      elem => elem.addEventListener("click", () => {
+    this.target.querySelectorAll("[x-ref='close']").forEach(elem =>
+      elem.addEventListener("click", () => {
         this.close();
       })
-    )
+    );
     // Swap maximize/restore buttons on maximize-restore-group
-    this.target.querySelectorAll("[x-ref='maximize-restore-group']").forEach(
-      elem => elem.addEventListener("click", () => {
+    this.target.querySelectorAll("[x-ref='maximize-restore-group']").forEach(elem =>
+      elem.addEventListener("click", () => {
         const button_maximize = elem.querySelector("[x-ref='maximize']");
         const button_restore = elem.querySelector("[x-ref='restore']");
         if (this.maximized) {
@@ -229,13 +245,13 @@ class Pane {
           button_restore.style.display = "none";
         }
       })
-    )
+    );
     // Taskbar button
     if (this.taskbar_button) {
       this.taskbar_button.addEventListener("click", () => {
         this.desktop.bringToFront(this.target);
         this.setMinimized(false);
-      })
+      });
     }
   }
 
@@ -272,7 +288,7 @@ class Pane {
       minimized: this.minimized,
       maximized: this.maximized,
       focused: this.focused,
-    }
+    };
   }
 
   /**
@@ -337,19 +353,17 @@ class Pane {
     this.target.style.zIndex = this.z;
     this.moveable.selfElement.style.zIndex = this.z;
     // Swap maximize/restore buttons
-    this.target.querySelectorAll("[x-ref='maximize-restore-group']").forEach(
-      elem => {
-        const button_maximize = elem.querySelector("[x-ref='maximize']");
-        const button_restore = elem.querySelector("[x-ref='restore']");
-        if (this.maximized) {
-          button_maximize.style.display = "none";
-          button_restore.style.display = "block";
-        } else {
-          button_restore.style.display = "none";
-          button_maximize.style.display = "block";
-        }
+    this.target.querySelectorAll("[x-ref='maximize-restore-group']").forEach(elem => {
+      const button_maximize = elem.querySelector("[x-ref='maximize']");
+      const button_restore = elem.querySelector("[x-ref='restore']");
+      if (this.maximized) {
+        button_maximize.style.display = "none";
+        button_restore.style.display = "block";
+      } else {
+        button_restore.style.display = "none";
+        button_maximize.style.display = "block";
       }
-    )
+    });
     if (this.maximized) {
       this.target.style.transform = `translate(0px, 0px)`;
       this.target.style.width = "100%";
@@ -419,13 +433,13 @@ class Desktop {
   bringToFront(pane_target) {
     const idx = this.panes.findIndex(p => p.target === pane_target);
     if (idx < 0) return;
-    const pane = this.panes[idx]
+    const pane = this.panes[idx];
     const pane_z_old = pane.z;
     // Find all panes with z-index > pane_z_old and decrement them
     this.panes.forEach(p => {
       p.setFocused(false);
       if (p.z > pane_z_old) p.setZ(p.z - 1);
-    })
+    });
     // Set new active pane to top
     pane.setFocused(true);
     pane.setZ(this.z_next - 1);
@@ -446,7 +460,7 @@ class Desktop {
       this.reset();
       return;
     }
-    saved_panes.forEach(saved_pane => this.createPane(saved_pane))
+    saved_panes.forEach(saved_pane => this.createPane(saved_pane));
   }
 
   reset() {
@@ -471,13 +485,14 @@ class Desktop {
           <span>OK</span>
         </button>
       </div>
-    `
+    `;
     this.createPane({
       name: "alert",
       title: title,
       taskbar_title: "Error",
       initial_body_elem: elem,
-      icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msg_error-0.png",
+      icon_path:
+        "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msg_error-0.png",
       hide_minimize: true,
       hide_maximize: true,
       hide_close: false,
@@ -552,13 +567,14 @@ class Desktop {
     const elem = `
       <div class="bg-white h-100 w-100">
       </div>
-    `
+    `;
     this.createPane({
       name: "challenges",
       title: "Challenges",
       taskbar_title: "Challenges",
       initial_body_elem: elem,
-      icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
+      icon_path:
+        "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
       width: "600px",
       height: "400px",
     });
