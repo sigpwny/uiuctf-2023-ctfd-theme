@@ -1,125 +1,55 @@
 {% extends "base.html" %}
 
-{% block head %}
-<link rel="stylesheet prefetch" href="/themes/uiuctf-2023-ctfd-theme/static/windows-95-ui-kit/css/bootstrap.min.css">
-<link rel="stylesheet prefetch" href="/themes/uiuctf-2023-ctfd-theme/static/windows-95-ui-kit/css/w95.css">
-<script src="//daybrush.com/moveable/release/latest/dist/moveable.min.js"></script>
+{% block content %}
+  <div class="jumbotron">
+    <div class="container">
+      <h1>
+        {% trans %}Login{% endtrans %}
+      </h1>
+    </div>
+  </div>
 
-<style>
-  .moveable-control-box {
-    visibility: hidden !important;
-  }
-</style>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col offset-md-2 col-lg-6 offset-lg-3">
+        {% include "components/errors.html" %}
 
-<script type="text/javascript">
-  document.addEventListener('alpine:init', () => {
-    Alpine.data('login', () => ({
-      init() {
-        // https://daybrush.com/moveable/storybook/index.html?path=/story/basic--basic-draggable
-        this.$refs.dragme.style.transform = localStorage.getItem("login-window-position") || "translate(0px, 0px)";
-
-        (new Moveable(document.body, {
-            target: this.$refs.dragme,
-            dragTarget: this.$refs.dragmehandle,
-            draggable: true,
-            throttleDrag: 1,
-            edgeDraggable: false,
-            startDragRotate: 0,
-            throttleDragRotate: 0,
-        })).on("drag", e => {
-          localStorage.setItem("login-window-position", e.transform);
-          e.target.style.transform = e.transform;
-        });
-      }
-    }))
-  })
-</script>
-{% endblock head %}
-
-{% block page %}
-<div class="min-vh-100 d-flex flex-column bg-info">
-  <main class="d-flex flex-grow-1 w-100 flex-column" x-data="login">
-    <div class="d-flex align-self-center justify-content-center container">
-      <div class="col-12 col-md-6 col-lg-8 mb-4 mb-lg-0">
-        <div class="card card-tertiary" x-ref="dragme">
-          <div class="card-header d-flex flex-row justify-content-between align-items-center" x-ref="dragmehandle">
-            <span>Enter CTFd Password</span>
-          </div>
-          {% include "components/errors.html" %}
-
-          {% if integrations.mlc() %}
+        {% if integrations.mlc() %}
           <a class="btn btn-secondary btn-lg btn-block w-100" href="{{ url_for('auth.oauth_login') }}">
             Login with Major League Cyber
           </a>
 
           <hr>
-          {% endif %}
-          {% with form = Forms.auth.LoginForm() %}
-          <form method="post" accept-charset="utf-8" autocomplete="off" class="p-2">
+        {% endif %}
 
-          <div class="row">
-            <div class="col-3 d-flex justify-content-center">
-              <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_win_alt-2.png" width="64" height="64">
-            </div>
-            <div class="col-6">
-              <p>
-                Type a name to identify yourself to CTFd. Enter a password.
-                <br><br>
-                Tip: If you don't enter a password, you won't get this prompt again at startup.
-                
-              </p>
-            </div>
-            <div class="col-3">
-              <!-- MAKE SURE this is the same as the previous HTML. -->
-              <!-- Otherwise wtforms will break. https://github.com/CTFd/CTFd/blob/fdec5bc7abf4727519b0b8185fd93dc18c1ec8b2/CTFd/forms/fields.py#L4 -->
-              <!-- {{ form.submit(class="btn btn-sm btn-primary") }} -->
-              <button class="btn btn-sm btn-block btn-primary" id="_submit" name="_submit" value="Submit">
-                <span>OK</span>
-              </button>
-              <button class="btn btn-sm btn-block btn-primary" disabled>
-                <span>Cancel</span>
-              </button>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-3"></div>
-            <div class="col-2">
+        {% with form = Forms.auth.LoginForm() %}
+          <form method="post" accept-charset="utf-8" autocomplete="off">
+            <div class="mb-3">
               <b>{{ form.name.label(class="form-label") }}</b>
-            </div>
-            <div class="col-4">
               {{ form.name(class="form-control", value=name) }}
             </div>
-            <div class="col-3"></div>
-          </div>
-          <div class="row">
-            <div class="col-3"></div>
-            <div class="col-2">
+
+            <div class="mb-3">
               <b>{{ form.password.label(class="form-label") }}</b>
-            </div>
-            <div class="col-4">
               {{ form.password(class="form-control", value=password) }}
             </div>
-            <div class="col-3"></div>
-          </div>
-          <div class="row">
-            <div class="col-3"></div>
-              <div class="col-6">
-                <a class="align-middle font-xsmall" href="{{ url_for('auth.reset_password') }}">
-                  Forgot your password?
+
+            <div class="row pt-3">
+              <div class="col-6 col-md-8">
+                <a class="align-middle" href="{{ url_for('auth.reset_password') }}">
+                  {% trans %}Forgot your password?{% endtrans %}
                 </a>
               </div>
-              <div class="col-3"></div>
+
+              <div class="col-6 col-md-4">
+                {{ form.submit(class="btn btn-block btn-primary w-100") }}
+              </div>
+            </div>
 
             {{ form.nonce() }}
           </form>
-          {% endwith %}
-        </div>
+        {% endwith %}
       </div>
     </div>
-  </main>
-</div>
-{% endblock %}
-
-{% block scripts %}
-  {{ Assets.js("assets/js/login.js") }}
+  </div>
 {% endblock %}
