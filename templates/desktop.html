@@ -125,6 +125,13 @@
       min-height: 64px;
     }
 
+    /* @minh TODO FIXME this is a temporary fix for the info pane */
+    @media (min-width: 768px) {
+      .pane {
+        max-width: 50%;
+      }
+    }
+
     .card-header-content {
       white-space: nowrap;
       overflow: hidden;
@@ -168,9 +175,62 @@
   </style>
 
   <script type="text/javascript">
+    function timer(expiry) {
+      return {
+        expiry: expiry,
+        remaining:null,
+        init() {
+          this.setRemaining()
+          setInterval(() => {
+            this.setRemaining();
+          }, 1000);
+        },
+        setRemaining() {
+          this.isCountdown = new Date().getTime() > this.expiry;
+          const diff = (this.isCountdown) ? this.expiry - new Date().getTime() : new Date().getTime() - this.expiry;
+          this.remaining = parseInt(diff / 1000);
+        },
+        days() {
+          return {
+            value: this.remaining / 86400,
+            remaining:this.remaining % 86400
+          };
+        },
+        hours() {
+          return {
+            value:this.days().remaining / 3600,
+            remaining:this.days().remaining % 3600
+          };
+        },
+        minutes() {
+          return {
+            value:this.hours().remaining / 60,
+            remaining:this.hours().remaining % 60
+          };
+        },
+        seconds() {
+          return {
+            value: this.minutes().remaining,
+          };
+        },
+        format(value) {
+          return ("0" + parseInt(value)).slice(-2)
+        },
+        time(){
+          return {
+            days:this.format(this.days().value),
+            hours:this.format(this.hours().value),
+            minutes:this.format(this.minutes().value),
+            seconds:this.format(this.seconds().value),
+            text: this.isCountdown ? "left" : ""
+          }
+        },
+      }
+    }
+
     document.addEventListener('alpine:init', () => {
       Alpine.store('globals', {
-            user: null,
+            user: null
       })
       Alpine.data('desktop', () => ({
         init() {
@@ -747,18 +807,33 @@
                                                   <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/tip.png" alt="">
                                                   <p class="font-weight-bold ml-2 mt-2">Did you know...</p>
                                               </div>
-                                              <p><a href="https://discord.gg/9x2DBQXf96" target="_blank" rel="noopener noreferrer">Join the Discord server!</a></p>
+                                              <p>We have a <a href="https://discord.gg/9x2DBQXf96" target="_blank" rel="noopener noreferrer"> Discord server!</a></p>
                                             </div>
                                         </template>
                                         <template x-if="selected == 'when'">
+                                          <div>
                                             <p>
                                             UIUCTF 2023 will be held Sat, 01 July 2023, 00:00 UTC — Mon, 03 July 2023, 00:00 UTC.
                                             </p>
+                                            <!-- https://codepen.io/harsh/pen/KKdEVPV -->
+                                            <div x-data="timer((window.init.end !== null) ? window.init.end * 1000 : window.init.start * 1000)">
+                                              <h1 x-text="\`\${time().days}d:\${time().hours}h:\${time().minutes}m:\${time().seconds}s\`"></h1>
+                                            </div>
+                                          </div>
                                         </template>
                                         <template x-if="selected == 'prizes'">
-                                            <p>
-                                                Prizes TBD.
-                                            </p>
+                                            <div>
+                                              <p> As Gill Bates once said, 5.736K ought to be enough for anybody.<br>
+                                                That's why we are distributing exactly that much money!</p>
+                                              <ul>
+                                                <li>First Place - $2048</li>
+                                                <li>Second Place - $1024</li>
+                                                <li>Third Place - $512</li>
+                                                <li>4th / 5th Place - $256</li>
+                                                <li>6th - 10th Place - $128</li>
+                                                <li>Writeup Prize Money - $1000</li>
+                                              </ul>
+                                            </div>
                                         </template>
                                         <template x-if="selected == 'sponsors'">
                                             <div>
@@ -766,19 +841,19 @@
                                                   SIGPwny thanks its UIUCTF 2023 sponsors:
                                               </p>
                                               <div class="row">
-                                                  <div class="col-8 mb-2">
+                                                  <div class="col-6 mb-2">
                                                       <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/battelle-blue.png" class="img-fluid" alt="">
                                                   </div>
-                                                  <div class="col-8 mb-2">
+                                                  <div class="col-6 mb-2">
                                                       <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/zellic2.png" class="img-fluid" alt="">
                                                   </div>
-                                                  <div class="col-8 mb-2">
+                                                  <div class="col-6 mb-2">
                                                       <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/trail-of-bits.png" class="img-fluid" alt="">
                                                   </div>
-                                                  <div class="col-8">
+                                                  <div class="col-6 mb-2">
                                                       <a href="https://davidan.dev"><img src="https://davidan.dev/logo.png" class="img-fluid" alt=""></a>
                                                   </div>
-                                                  <div class="col-8 mb-2">
+                                                  <div class="col-6 mb-2">
                                                       <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/google-cloud.png" class="img-fluid" alt="">
                                                       <p>Infra sponsored by <a href="https://goo.gle/ctfsponsorship" target="_blank" rel="noopener noreferrer">goo.gle/ctfsponsorship</a></p>
                                                   </div>
@@ -845,7 +920,7 @@
               this.createPane({
                 name: "info",
                 title: "Info for UIUCTF 2023",
-                taskbar_title: "Help",
+                taskbar_title: "Info",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/help_book_big-1.png",
                 hide_minimize: true,
