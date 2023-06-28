@@ -57,6 +57,7 @@ export default defineConfig({
         },
       },
       input: {
+        desktop: resolve(__dirname, "assets/js/desktop.js"),
         index: resolve(__dirname, "assets/js/index.js"),
         page: resolve(__dirname, "assets/js/page.js"),
         setup: resolve(__dirname, "assets/js/setup.js"),

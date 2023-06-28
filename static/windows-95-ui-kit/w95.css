@@ -5463,10 +5463,16 @@ textarea[resize="horizontal"] {
 .tab-content {
   background: #c0c0c0;
   padding: 1rem 1.4rem;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
+  transition: none;
+  overflow: auto;
 }
 
 .nav-tabs {
-  border-bottom: 2px solid #dededf;
+  border-bottom: 2px solid #ffffff;
+  transition: none;
 }
 
 .nav-tabs .nav-item {
@@ -5474,29 +5480,38 @@ textarea[resize="horizontal"] {
   margin-bottom: 0;
   background: #c0c0c0;
   color: black;
-  border-top-left-radius: 4px;
+  /* border-top-left-radius: 4px;
   border-top-right-radius: 4px;
-  border-right: 1px solid #5a5a5a;
+  border-right: 1px solid #5a5a5a; */
   box-sizing: border-box;
+  transition: none;
 }
 
 .nav-tabs .nav-item .nav-link {
+  position: relative;
+  top: 2px;
   font-size: 0.5rem;
   color: black;
-  padding: 0.2rem 1.8rem;
-  font-style: italic;
+  padding: 0.2rem 0.5rem;
   box-sizing: border-box;
   transform: none;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #000000;
+  transition: none;
 }
 
 .nav-tabs .nav-item .nav-link.active {
   position: relative;
+  top: 0px;
   background: #c0c0c0;
-  border-right: 1px solid #5a5a5a;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #000000;
 }
 
 .nav-tabs .nav-item:not(:first-child) .nav-link.active {
-  border-left: 1px solid #5a5a5a;
+  border-left: 2px solid #ffffff;
 }
 
 .nav-tabs .nav-item .nav-link.active:after {
@@ -5512,7 +5527,6 @@ textarea[resize="horizontal"] {
 
 .nav-tabs .nav-link {
   border: 0;
-  padding: 1rem 1rem;
 }
 
 /**
