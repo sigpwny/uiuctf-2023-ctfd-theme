@@ -1,584 +1,368 @@
+/* challenges.js */
+
 import Alpine from "alpinejs";
+import dayjs from "dayjs";
+import { getOption } from "./utils/graphs/echarts/scoreboard";
+import { embed } from "./utils/graphs/echarts";
+import { serializeJSON } from "@ctfdio/ctfd-js/forms";
+import { copyToClipboard } from "./utils/clipboard";
+
 import CTFd from "./index";
 
-window.CTFd = CTFd;
+import { Modal, Tab } from "bootstrap";
+import highlight from "./theme/highlight";
+
+function addTargetBlank(html) {
+  let dom = new DOMParser();
+  let view = dom.parseFromString(html, "text/html");
+  let links = view.querySelectorAll('a[href*="://"]');
+  links.forEach(link => {
+    link.setAttribute("target", "_blank");
+  });
+  return view.documentElement.outerHTML;
+}
+
 window.Alpine = Alpine;
+window.CTFd = CTFd;
 
-class Pane {
-  constructor(params) {
-    // Check required parameters
-    if (!params.name) throw new Error("Pane must have a name");
-    if (!params.desktop) throw new Error("Pane must be linked to a Desktop");
-    if (!params.title) throw new Error("Pane must have a title");
-    if (!params.initial_body_elem)
-      throw new Error("Pane must have initial body element");
-    this.name = params.name;
-    this.desktop = params.desktop;
-    this.title = params.title;
-    this.taskbar_title = params.taskbar_title ?? params.title;
-    this.initial_body_elem = params.initial_body_elem;
-    this.icon_path = params.icon_path ?? null;
-    this.hide_minimize = params.hide_minimize ?? false;
-    this.hide_maximize = params.hide_maximize ?? false;
-    this.hide_close = params.hide_close ?? false;
-    this.disable_drag = params.disable_drag ?? false;
-    this.disable_resize = params.disable_resize ?? false;
-    this.#createPaneDOM();
+Alpine.store("challenge", {
+  data: {
+    view: "",
+  },
+});
 
-    // Dynamic attributes
-    this.transform =
-      params.transform ?? `translate(${params.x ?? 0}px, ${params.y ?? 0}px)`;
-    this.z = params.z ?? 0;
-    this.width = params.width ?? null;
-    this.height = params.height ?? null;
-    this.minimized = params.minimized ?? false;
-    this.maximized = params.maximized ?? false;
-    this.focused = params.focused ?? false;
+Alpine.data("Hint", () => ({
+  id: null,
+  html: null,
 
-    this.moveable = new Moveable(document.body, {
-      target: this.target,
-      dragTarget: this.handle ?? null,
-      // Draggable options
-      draggable: !this.maximized && !this.disable_drag,
-      throttleDrag: 1,
-      edgeDraggable: false,
-      startDragRotate: 0,
-      throttleDragRotate: 0,
-      edge: true,
-      origin: false,
-      // Resizable options
-      resizable: !this.maximized && !this.disable_resize,
-      throttleResize: 1,
-      keepRatio: false,
-      renderDirections: ["nw", "ne", "se", "sw"],
-    });
-    this.#registerListeners();
-    this.#commitDOM();
-    if (this.transform === "center") {
-      this.transform = `translate(${
-        (this.desktop.elem.offsetWidth - this.target.offsetWidth) / 2
-      }px, ${(this.desktop.elem.offsetHeight - this.target.offsetHeight) / 2}px)`;
-    }
-    this.render();
-  }
+  async showHint(event) {
+    if (event.target.open) {
+      let response = await CTFd.pages.challenge.loadHint(this.id);
+      let hint = response.data;
+      if (hint.content) {
+        this.html = addTargetBlank(hint.html);
+      } else {
+        let answer = await CTFd.pages.challenge.displayUnlock(this.id);
+        if (answer) {
+          let unlock = await CTFd.pages.challenge.loadUnlock(this.id);
 
-  #createPaneDOM() {
-    // Ensure xref_target is unique
-    let uniq, xref_target;
-    do {
-      uniq = Math.random().toString(16).slice(2);
-      xref_target = `${this.name}_${uniq}`;
-    } while (document.querySelector(`[x-ref="${xref_target}"]`));
-    const xref_target_handle = `${xref_target}_handle`;
-    const xref_target_taskbar_button = `${xref_target}_taskbar_button`;
-
-    // Create pane parent
-    const pane_elem = document.createElement("div");
-    pane_elem.setAttribute("x-ref", xref_target);
-    pane_elem.setAttribute("class", "card pane flex-column");
-
-    // Create handle
-    const pane_handle = document.createElement("div");
-    pane_handle.setAttribute("x-ref", xref_target_handle);
-    pane_handle.setAttribute(
-      "class",
-      "card-header d-flex flex-row justify-content-between align-items-center"
-    );
-    const pane_title = document.createElement("div");
-    pane_title.setAttribute("class", "card-header-content");
-    // TODO: Icon
-    pane_title.appendChild(document.createTextNode(this.title));
-    pane_handle.appendChild(pane_title);
-
-    // Create pane controls
-    const pane_controls = document.createElement("div");
-    pane_controls.setAttribute("class", "d-flex flex-row");
-    if (!this.hide_minimize) {
-      pane_controls.insertAdjacentHTML(
-        "beforeend",
-        `
-        <div class="pane-control-icon" x-ref="minimize">
-          <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/minimize.png">
-          <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/minimize_pressed.png">
-        </div>
-      `
-      );
-    }
-    if (!this.hide_maximize) {
-      pane_controls.insertAdjacentHTML(
-        "beforeend",
-        `
-        <span x-ref="maximize-restore-group">
-          <div class="pane-control-icon" x-ref="maximize">
-            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/maximize.png" alt="">
-            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/maximize_pressed.png" alt="">
-          </div>
-          <div class="pane-control-icon" x-ref="restore">
-            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/restore.png" alt="">
-            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/restore_pressed.png" alt="">
-          </div>
-        </span>
-      `
-      );
-    }
-    if (!this.hide_close) {
-      pane_controls.insertAdjacentHTML(
-        "beforeend",
-        `
-        <div class="pane-control-icon close-icon" x-ref="close">
-          <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
-          <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
-        </div>
-      `
-      );
-    }
-    pane_handle.appendChild(pane_controls);
-    pane_elem.appendChild(pane_handle);
-
-    // Create pane body
-    const pane_body = document.createElement("div");
-    pane_body.setAttribute("class", "card-body");
-    pane_body.insertAdjacentHTML("beforeend", this.initial_body_elem);
-    pane_elem.appendChild(pane_body);
-
-    // Create taskbar button
-    const taskbar_button = document.createElement("li");
-    taskbar_button.setAttribute("class", "nav-item taskbar-button");
-    const taskbar_button_link = document.createElement("a");
-    taskbar_button_link.setAttribute("x-ref", xref_target_taskbar_button);
-    taskbar_button_link.setAttribute("class", "nav-link d-flex flex-row");
-    taskbar_button_link.setAttribute("role", "button");
-    const taskbar_button_icon = document.createElement("img");
-    taskbar_button_icon.setAttribute("class", "taskbar-icon");
-    if (this.icon_path) taskbar_button_icon.setAttribute("src", this.icon_path);
-    const taskbar_button_text = document.createElement("div");
-    taskbar_button_text.innerText = this.taskbar_title;
-    taskbar_button_link.appendChild(taskbar_button_icon);
-    taskbar_button_link.appendChild(taskbar_button_text);
-    taskbar_button.appendChild(taskbar_button_link);
-
-    // Set created elements
-    this.target = pane_elem;
-    this.handle = pane_handle;
-    this.taskbar_button = taskbar_button_link;
-  }
-
-  /**
-   * Registers event listeners for all components used to control the pane
-   */
-  #registerListeners() {
-    this.moveable.on("drag", e => {
-      e.target.style.transform = e.transform;
-      if (this.maximized) this.setMaximized(false);
-    });
-    this.moveable.on("resize", e => {
-      e.target.style.transform = e.transform;
-      e.target.style.width = `${e.width}px`;
-      e.target.style.height = `${e.height}px`;
-    });
-    this.moveable.on("dragStart", e => {
-      this.desktop.bringToFront(this.target);
-    });
-    this.moveable.on("resizeStart", e => {
-      this.desktop.bringToFront(this.target);
-    });
-    this.moveable.on("dragEnd", e => {
-      if (!this.maximized) {
-        this.transform = e.target.style.transform;
-      }
-      this.desktop.save();
-    });
-    this.moveable.on("resizeEnd", e => {
-      this.transform = e.target.style.transform;
-      this.width = e.target.style.width;
-      this.height = e.target.style.height;
-      this.desktop.save();
-    });
-    // If any part of the pane is clicked, bring it to the front
-    this.target.addEventListener("click", () => {
-      this.desktop.bringToFront(this.target);
-    });
-    // Maximize/restore on handle double click
-    this.handle.addEventListener("dblclick", () => {
-      this.setMaximized(!this.maximized);
-      this.render();
-      this.desktop.save();
-    });
-    // Minimize buttons
-    this.target.querySelectorAll("div[x-ref='minimize']").forEach(elem =>
-      elem.addEventListener("click", event => {
-        this.setMinimized(true);
-        event.stopImmediatePropagation();
-      })
-    );
-    // Maximize buttons
-    this.target.querySelectorAll("div[x-ref='maximize']").forEach(elem =>
-      elem.addEventListener("click", event => {
-        this.setMaximized(true);
-        event.stopImmediatePropagation();
-      })
-    );
-    // Restore buttons
-    this.target.querySelectorAll("div[x-ref='restore']").forEach(elem =>
-      elem.addEventListener("click", event => {
-        this.setMaximized(false);
-        this.desktop.bringToFront(this.target);
-        event.stopImmediatePropagation();
-      })
-    );
-    // Close buttons
-    this.target.querySelectorAll("[x-ref='close']").forEach(elem =>
-      elem.addEventListener("click", () => {
-        this.close();
-      })
-    );
-    // Swap maximize/restore buttons on maximize-restore-group
-    this.target.querySelectorAll("[x-ref='maximize-restore-group']").forEach(elem =>
-      elem.addEventListener("click", () => {
-        const button_maximize = elem.querySelector("[x-ref='maximize']");
-        const button_restore = elem.querySelector("[x-ref='restore']");
-        if (this.maximized) {
-          button_maximize.style.display = "none";
-          button_restore.style.display = "block";
+          if (unlock.success) {
+            let response = await CTFd.pages.challenge.loadHint(this.id);
+            let hint = response.data;
+            this.html = addTargetBlank(hint.html);
+          } else {
+            event.target.open = false;
+            CTFd._functions.challenge.displayUnlockError(unlock);
+          }
         } else {
-          button_maximize.style.display = "block";
-          button_restore.style.display = "none";
+          event.target.open = false;
         }
-      })
+      }
+    }
+  },
+}));
+
+Alpine.data("Challenge", () => ({
+  id: null,
+  next_id: null,
+  submission: "",
+  tab: null,
+  solves: [],
+  response: null,
+
+  async init() {
+    highlight();
+  },
+
+  getStyles() {
+    let styles = {
+      "modal-dialog": true,
+    };
+    try {
+      let size = CTFd.config.themeSettings.challenge_window_size;
+      switch (size) {
+        case "sm":
+          styles["modal-sm"] = true;
+          break;
+        case "lg":
+          styles["modal-lg"] = true;
+          break;
+        case "xl":
+          styles["modal-xl"] = true;
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      // Ignore errors with challenge window size
+      console.log("Error processing challenge_window_size");
+      console.log(error);
+    }
+    return styles;
+  },
+
+  async init() {
+    highlight();
+  },
+
+  async showChallenge() {
+    new Tab(this.$el).show();
+  },
+
+  async showSolves() {
+    this.solves = await CTFd.pages.challenge.loadSolves(this.id);
+    this.solves.forEach(solve => {
+      solve.date = dayjs(solve.date).format("MMMM Do, h:mm:ss A");
+      return solve;
+    });
+    new Tab(this.$el).show();
+  },
+
+  getNextId() {
+    let data = Alpine.store("challenge").data;
+    return data.next_id;
+  },
+
+  async nextChallenge() {
+    let modal = Modal.getOrCreateInstance("[x-ref='challengeWindow']");
+
+    // TODO: Get rid of this private attribute access
+    // See https://github.com/twbs/bootstrap/issues/31266
+    modal._element.addEventListener(
+      "hidden.bs.modal",
+      event => {
+        // Dispatch load-challenge event to call loadChallenge in the ChallengeBoard
+        Alpine.nextTick(() => {
+          this.$dispatch("load-challenge", this.getNextId());
+        });
+      },
+      { once: true }
     );
-    // Taskbar button
-    if (this.taskbar_button) {
-      this.taskbar_button.addEventListener("click", () => {
-        this.desktop.bringToFront(this.target);
-        this.setMinimized(false);
+    modal.hide();
+  },
+
+  async submitChallenge() {
+    this.response = await CTFd.pages.challenge.submitChallenge(
+      this.id,
+      this.submission
+    );
+
+    await this.renderSubmissionResponse();
+  },
+
+  async renderSubmissionResponse() {
+    if (this.response.data.status === "correct") {
+      this.submission = "";
+    }
+
+    // Dispatch load-challenges event to call loadChallenges in the ChallengeBoard
+    this.$dispatch("load-challenges");
+  },
+}));
+
+Alpine.data("ChallengeBoard", () => ({
+  loaded: false,
+  challenges: [],
+  challenge: null,
+
+  async init() {
+    this.challenges = await CTFd.pages.challenges.getChallenges();
+    this.loaded = true;
+
+    if (window.location.hash) {
+      let chalHash = decodeURIComponent(window.location.hash.substring(1));
+      let idx = chalHash.lastIndexOf("-");
+      if (idx >= 0) {
+        let pieces = [chalHash.slice(0, idx), chalHash.slice(idx + 1)];
+        let id = pieces[1];
+        await this.loadChallenge(id);
+      }
+    }
+  },
+
+  getCategories() {
+    const categories = [];
+
+    this.challenges.forEach(challenge => {
+      const { category } = challenge;
+
+      if (!categories.includes(category)) {
+        categories.push(category);
+      }
+    });
+
+    try {
+      const f = CTFd.config.themeSettings.challenge_category_order;
+      if (f) {
+        const getSort = new Function(`return (${f})`);
+        categories.sort(getSort());
+      }
+    } catch (error) {
+      // Ignore errors with theme category sorting
+      console.log("Error running challenge_category_order function");
+      console.log(error);
+    }
+
+    return categories;
+  },
+
+  getChallenges(category) {
+    let challenges = this.challenges;
+
+    if (category) {
+      challenges = this.challenges.filter(challenge => challenge.category === category);
+    }
+
+    try {
+      const f = CTFd.config.themeSettings.challenge_order;
+      if (f) {
+        const getSort = new Function(`return (${f})`);
+        challenges.sort(getSort());
+      }
+    } catch (error) {
+      // Ignore errors with theme challenge sorting
+      console.log("Error running challenge_order function");
+      console.log(error);
+    }
+
+    return challenges;
+  },
+
+  async loadChallenges() {
+    this.challenges = await CTFd.pages.challenges.getChallenges();
+  },
+
+  async loadChallenge(challengeId) {
+    await CTFd.pages.challenge.displayChallenge(challengeId, challenge => {
+      challenge.data.view = addTargetBlank(challenge.data.view);
+      Alpine.store("challenge").data = challenge.data;
+
+      // nextTick is required here because we're working in a callback
+      Alpine.nextTick(() => {
+        let modal = Modal.getOrCreateInstance("[x-ref='challengeWindow']");
+        // TODO: Get rid of this private attribute access
+        // See https://github.com/twbs/bootstrap/issues/31266
+        modal._element.addEventListener(
+          "hidden.bs.modal",
+          event => {
+            // Remove location hash
+            history.replaceState(null, null, " ");
+          },
+          { once: true }
+        );
+        modal.show();
+        history.replaceState(null, null, `#${challenge.data.name}-${challengeId}`);
+      });
+    });
+  },
+}));
+
+/* scoreboard.js */
+
+Alpine.data("ScoreboardDetail", () => ({
+  data: null,
+
+  async init() {
+    this.data = await CTFd.pages.scoreboard.getScoreboardDetail(10);
+
+    let option = getOption(CTFd.config.userMode, this.data);
+    embed(this.$refs.scoregraph, option);
+  },
+}));
+
+/* settings.js */
+
+Alpine.data("SettingsForm", () => ({
+  success: null,
+  error: null,
+  initial: null,
+  errors: [],
+
+  init() {
+    this.initial = serializeJSON(this.$el);
+  },
+
+  async updateProfile() {
+    this.success = null;
+    this.error = null;
+    this.errors = [];
+
+    let data = serializeJSON(this.$el, this.initial, true);
+
+    // Process fields[id] to fields: {}
+    data.fields = [];
+    for (const property in data) {
+      if (property.match(/fields\[\d+\]/)) {
+        let field = {};
+        let id = parseInt(property.slice(7, -1));
+        field["field_id"] = id;
+        field["value"] = data[property];
+        data.fields.push(field);
+        delete data[property];
+      }
+    }
+
+    // Send API request
+    const response = await CTFd.pages.settings.updateSettings(data);
+    if (response.success) {
+      this.success = true;
+      this.error = false;
+
+      setTimeout(() => {
+        this.success = null;
+        this.error = null;
+      }, 3000);
+    } else {
+      this.success = false;
+      this.error = true;
+
+      Object.keys(response.errors).map(error => {
+        const error_msg = response.errors[error];
+        this.errors.push(error_msg);
       });
     }
-  }
+  },
+}));
 
-  #commitDOM() {
-    this.desktop.elem.appendChild(this.target);
-    if (this.taskbar_button) this.desktop.taskbar.appendChild(this.taskbar_button);
-  }
+Alpine.data("TokensForm", () => ({
+  token: null,
 
-  #removeDOM() {
-    this.desktop.elem.removeChild(this.target);
-    if (this.taskbar_button) this.desktop.taskbar.removeChild(this.taskbar_button);
-  }
+  async generateToken() {
+    const data = serializeJSON(this.$el);
 
-  /**
-   * Generate JSON representation of the pane's state for storing
-   * @returns {object} JSON object representing the state of the pane
-   */
-  toJSON() {
-    return {
-      name: this.name,
-      title: this.title,
-      taskbar_title: this.taskbar_title,
-      initial_body_elem: this.initial_body_elem,
-      icon_path: this.icon_path,
-      hide_minimize: this.hide_minimize,
-      hide_maximize: this.hide_maximize,
-      hide_close: this.hide_close,
-      disable_drag: this.disable_drag,
-      disable_resize: this.disable_resize,
-      transform: this.transform,
-      z: this.z,
-      width: this.width,
-      height: this.height,
-      minimized: this.minimized,
-      maximized: this.maximized,
-      focused: this.focused,
-    };
-  }
-
-  /**
-   * Closes the pane by removing its elements from the DOM and desktop state
-   */
-  close() {
-    this.desktop.panes = this.desktop.panes.filter(p => p !== this);
-    this.desktop.save();
-    this.#removeDOM();
-  }
-
-  /**
-   * Sets the z-index of the pane and updates the DOM
-   * @param {number} value Z-index to set
-   */
-  setZ(value) {
-    this.z = value;
-    this.render();
-    this.desktop.save();
-  }
-
-  /**
-   * Sets the minimized state of the pane and updates the DOM
-   * @param {boolean} value True if pane should be hidden, false to use previous state
-   */
-  setMinimized(value) {
-    if (this.hide_minimize) return;
-    this.minimized = value;
-    if (value) this.focused = false;
-    this.render();
-    this.desktop.save();
-  }
-
-  /**
-   * Sets the maximized state of the pane and updates the DOM
-   * @param {boolean} value True if pane should be maximized, false to use previous state
-   */
-  setMaximized(value) {
-    if (this.hide_maximize) return;
-    this.maximized = value;
-    this.moveable.draggable = !value && !this.disable_drag;
-    this.moveable.resizable = !value && !this.disable_resize;
-    this.render();
-    this.desktop.save();
-  }
-
-  /**
-   * Sets whether the pane is focused or not
-   * @param {boolean} value True if the pane is focused, false if not
-   */
-  setFocused(value) {
-    this.focused = value;
-    this.render();
-    this.desktop.save();
-  }
-
-  /**
-   *  Updates the DOM to reflect the current state of the pane
-   */
-  render() {
-    // Set z-indices of pane and moveable controls
-    this.target.style.zIndex = this.z;
-    this.moveable.selfElement.style.zIndex = this.z;
-    // Swap maximize/restore buttons
-    this.target.querySelectorAll("[x-ref='maximize-restore-group']").forEach(elem => {
-      const button_maximize = elem.querySelector("[x-ref='maximize']");
-      const button_restore = elem.querySelector("[x-ref='restore']");
-      if (this.maximized) {
-        button_maximize.style.display = "none";
-        button_restore.style.display = "block";
-      } else {
-        button_restore.style.display = "none";
-        button_maximize.style.display = "block";
-      }
-    });
-    if (this.maximized) {
-      this.target.style.transform = `translate(0px, 0px)`;
-      this.target.style.width = "100%";
-      this.target.style.height = "100%";
-    } else {
-      this.target.style.transform = this.transform;
-      this.target.style.width = this.width;
-      this.target.style.height = this.height;
+    if (!data.expiration) {
+      delete data.expiration;
     }
-    if (this.minimized) {
-      this.target.style.display = "none";
-    } else {
-      this.target.style.display = "flex";
+    const response = await CTFd.pages.settings.generateToken(data);
+    this.token = response.data.value;
+
+    new Modal(this.$refs.tokenModal).show();
+  },
+
+  copyToken() {
+    copyToClipboard(this.$refs.token);
+  },
+}));
+
+Alpine.data("Tokens", () => ({
+  selectedTokenId: null,
+
+  async deleteTokenModal(tokenId) {
+    this.selectedTokenId = tokenId;
+    new Modal(this.$refs.confirmModal).show();
+  },
+
+  async deleteSelectedToken() {
+    await CTFd.pages.settings.deleteToken(this.selectedTokenId);
+    const $token = this.$refs[`token-${this.selectedTokenId}`];
+
+    if ($token) {
+      $token.remove();
     }
-    // Set color of focused pane handle
-    if (this.focused) {
-      this.target.classList.add("card-tertiary");
-      if (this.taskbar_button) this.taskbar_button.classList.add("pane-focused");
-    } else {
-      this.target.classList.remove("card-tertiary");
-      if (this.taskbar_button) this.taskbar_button.classList.remove("pane-focused");
-    }
-    this.moveable.updateRect();
-  }
-}
+  },
+}));
 
-class Desktop {
-  constructor(params) {
-    if (!params.id) throw new Error("Desktop must have an ID");
-    if (!params.elem) throw new Error("Desktop must be linked to an element");
-    if (!params.taskbar) throw new Error("Desktop must be linked to a taskbar");
-    this.id = params.id;
-    this.elem = params.elem;
-    this.taskbar = params.taskbar;
-    this.x_next = 30;
-    this.y_next = 30;
-    this.z_next = 1000;
-    this.max_panes = 32;
-    this.panes = [];
-    // TODO
-    // this.first_load = true;
-    // this.user = "";
-    this.restore();
-  }
 
-  createPane(pane_options) {
-    if (this.panes.length > this.max_panes) {
-      this.reset();
-      return;
-    }
-    pane_options.desktop = this;
-    pane_options.z = this.z_next;
-    this.z_next += 1;
-    if (!pane_options.transform && !pane_options.x && !pane_options.y) {
-      pane_options.transform = `translate(${this.x_next}px, ${this.y_next}px)`;
-      this.x_next += 30;
-      this.y_next += 30;
-      if (this.x_next > 500) this.x_next = this.x_next % 100;
-      if (this.y_next > 500) this.y_next = this.y_next % 100;
-    }
-    // Create pane
-    const pane = new Pane(pane_options);
-    this.panes.push(pane);
-    this.bringToFront(pane.target);
-  }
-
-  bringToFront(pane_target) {
-    const idx = this.panes.findIndex(p => p.target === pane_target);
-    if (idx < 0) return;
-    const pane = this.panes[idx];
-    const pane_z_old = pane.z;
-    // Find all panes with z-index > pane_z_old and decrement them
-    this.panes.forEach(p => {
-      p.setFocused(false);
-      if (p.z > pane_z_old) p.setZ(p.z - 1);
-    });
-    // Set new active pane to top
-    pane.setFocused(true);
-    pane.setZ(this.z_next - 1);
-  }
-
-  markAllUnfocused() {
-    this.panes.forEach(p => p.setFocused(false));
-  }
-
-  save() {
-    localStorage.setItem(`desktop-${this.id}`, JSON.stringify(this.panes));
-  }
-
-  restore() {
-    const saved_panes = JSON.parse(localStorage.getItem(`desktop-${this.id}`));
-    if (!saved_panes) return;
-    if (saved_panes.length > this.max_panes) {
-      this.reset();
-      return;
-    }
-    saved_panes.forEach(saved_pane => this.createPane(saved_pane));
-  }
-
-  reset() {
-    localStorage.removeItem(`desktop-${this.id}`);
-    window.location.reload();
-  }
-
-  createAlertPane(title, content) {
-    const elem = `
-      <div class="d-flex flex-row user-select-none">
-        <div class="m-2">
-          <img class="flex-shrink-0" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msg_error-0.png">
-        </div>
-        <div class="m-2">
-          <p>
-            ${content}
-          </p>
-        </div>
-      </div>
-      <div class="d-flex flex-row justify-content-center">
-        <button class="btn btn-sm btn-primary" x-ref="close">
-          <span>OK</span>
-        </button>
-      </div>
-    `;
-    this.createPane({
-      name: "alert",
-      title: title,
-      taskbar_title: "Error",
-      initial_body_elem: elem,
-      icon_path:
-        "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msg_error-0.png",
-      hide_minimize: true,
-      hide_maximize: true,
-      hide_close: false,
-      disable_resize: true,
-      transform: "center",
-    });
-  }
-
-  createLoginPane() {
-    const elem = `
-      {% with form = Forms.auth.LoginForm() %}
-      <form action="/login" method="post" accept-charset="utf-8" autocomplete="off" class="pb-2 user-select-none">
-        <div class="d-flex flex-row">
-          <div class="px-4 py-1">
-            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_win_alt-2.png" width="64" height="64">
-          </div>
-          <div class="d-flex flex-column">
-            <p>
-              Type a user name and password to log on to UIUCTF 2023.
-            </p>
-            <div class="row">
-              <div class="col-4">
-                {{ form.name.label(class="form-label") }}
-              </div>
-              <div class="col-8">
-                {{ form.name(class="form-control", value=name) }}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-4">
-                {{ form.password.label(class="form-label") }}
-              </div>
-              <div class="col-8">
-                {{ form.password(class="form-control", value=password) }}
-              </div>
-            </div>
-            <div>
-              <a class="font-xsmall" href="{{ url_for('auth.reset_password') }}">
-                Forgot your password?
-              </a>
-            </div>
-          </div>
-          <div class="d-flex flex-column pl-4">
-            <!-- {{ form.submit(class="btn btn-sm btn-primary") }} -->
-            <button class="btn btn-sm btn-block btn-primary" id="_submit" name="_submit" value="Submit">
-              <span>OK</span>
-            </button>
-            <button class="btn btn-sm btn-block btn-primary" disabled>
-              <span>Cancel</span>
-            </button>
-          </div>
-        </div>
-        {{ form.nonce() }}
-      </form>
-      {% endwith %}
-    `;
-    this.createPane({
-      name: "login",
-      title: "Welcome to UIUCTF 2023",
-      taskbar_title: "Log In",
-      initial_body_elem: elem,
-      icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_win-1.png",
-      hide_minimize: true,
-      hide_maximize: true,
-      hide_close: false,
-      disable_resize: true,
-      transform: "center",
-    });
-  }
-
-  createChallengesPane() {
-    const elem = `
-      <div class="bg-white h-100 w-100">
-      </div>
-    `;
-    this.createPane({
-      name: "challenges",
-      title: "Challenges",
-      taskbar_title: "Challenges",
-      initial_body_elem: elem,
-      icon_path:
-        "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
-      width: "600px",
-      height: "400px",
-    });
-  }
-}
+/* Startup Alpine */
 
 Alpine.start();

@@ -125,13 +125,6 @@
       min-height: 64px;
     }
 
-    /* @minh TODO FIXME this is a temporary fix for the info pane */
-    @media (min-width: 768px) {
-      .pane {
-        max-width: 50%;
-      }
-    }
-
     .card-header-content {
       white-space: nowrap;
       overflow: hidden;
@@ -230,7 +223,8 @@
 
     document.addEventListener('alpine:init', () => {
       Alpine.store('globals', {
-            user: null
+            user: null,
+            show_start: true
       })
       Alpine.data('desktop', () => ({
         init() {
@@ -926,7 +920,8 @@
                 hide_minimize: true,
                 hide_maximize: true,
                 hide_close: false,
-                disable_resize: true,
+                width: "600px",
+                height: "400px",
                 transform: "center",
               });
             }
@@ -1029,11 +1024,332 @@
                 taskbar_title: "Register",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msagent-1.png",
-                hide_minimize: true,
-                hide_maximize: true,
                 hide_close: false,
-                disable_resize: true,
+                width: "600px",
+                height: "400px",
                 transform: "center",
+              });
+            }
+            async createScoreboardPane() {
+              const elem = `
+              {% include "components/errors.html" %}
+
+              <div id="score-graph" class="d-flex align-items-center" x-data="ScoreboardDetail" x-ref="scoregraph">
+                <div class="col-md-12 text-center">
+                  <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+                </div>
+              </div>
+
+              {% cache 60, CacheKeys.PUBLIC_SCOREBOARD_TABLE %}
+                {% if standings %}
+
+                  <div id="scoreboard" class="row">
+                    <div class="col-md-12">
+                      <table class="table table-striped">
+                        <thead>
+                        <tr>
+                          <td style="width: 10px"><b>Place</b></td>
+                          <td><b>{{ get_mode_as_word(capitalize=True) }}</b></td>
+                          <td><b>Score</b></td>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for standing in standings %}
+                          <tr>
+                            <th scope="row" class="text-center">{{ loop.index }}</th>
+                            <td>
+                              <a href="{{ generate_account_url(standing.account_id) }}">
+                                {{ standing.name | truncate(50) }}
+
+                                {% if standing.oauth_id %}
+                                  {% if Configs.user_mode == 'teams' %}
+                                    <a href="https://majorleaguecyber.org/t/{{ standing.name }}">
+                                      <span class="badge bg-primary ms-2">Official</span>
+                                    </a>
+                                  {% elif Configs.user_mode == 'users' %}
+                                    <a href="https://majorleaguecyber.org/u/{{ standing.name }}">
+                                      <span class="badge bg-primary ms-2">Official</span>
+                                    </a>
+                                  {% endif %}
+                                {% endif %}
+                              </a>
+                            </td>
+                            <td>{{ standing.score }}</td>
+                          </tr>
+                        {% endfor %}
+                        </tbody>
+
+                      </table>
+                    </div>
+                  </div>
+
+                {% endif %}
+              {% endcache %}
+              `
+              this.createPane({
+                name: "scoreboard",
+                title: "Scoreboard",
+                taskbar_title: "Scoreboard",
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/chart1-1.png",
+                width: "600px",
+                height: "400px",
+              });
+            }
+
+            async createSettingsPane() {
+              const elem = `<div class="row">
+
+<div class="col-md-3 offset-md-1 mb-3 mb-md-0">
+  <div class="nav flex-column nav-pills" role="tablist">
+    <button
+        class="nav-link active" id="settings-profile-tab" data-bs-toggle="pill"
+        data-bs-target="#profile" role="tab"
+    >Profile
+    </button>
+    <button
+        class="nav-link" id="settings-tokens-tab" data-bs-toggle="pill" data-bs-target="#tokens"
+        role="tab"
+    >Access Tokens
+    </button>
+  </div>
+</div>
+
+<div class="col-md-8">
+  <div class="tab-content" id="v-pills-tabContent">
+    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+      {% include "components/errors.html" %}
+      {% from "macros/forms.html" import render_extra_fields %}
+
+      {% with form = Forms.self.SettingsForm(country=country) %}
+        <form
+            method="post" accept-charset="utf-8" autocomplete="off" role="form"
+            x-data="SettingsForm"
+            @submit.prevent="updateProfile()"
+            class="form-horizontal"
+        >
+
+          <div class="mb-3">
+            <b>{{ form.name.label(class="form-label") }}</b>
+            {{ form.name(class="form-control", value=name) }}
+          </div>
+
+          <div class="mb-3">
+            <b>{{ form.email.label(class="form-label") }}</b>
+            {{ form.email(class="form-control", value=email) }}
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <b>{{ form.confirm.label(class="form-label") }}</b>
+            {{ form.confirm(class="form-control") }}
+          </div>
+          <div class="mb-3">
+            <b>{{ form.password.label(class="form-label") }}</b>
+            {{ form.password(class="form-control") }}
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <b>{{ form.affiliation.label(class="form-label") }}</b>
+            {{ form.affiliation(class="form-control", value=affiliation or "") }}
+          </div>
+          <div class="mb-3">
+            <b>{{ form.website.label(class="form-label") }}</b>
+            {{ form.website(class="form-control", value=website or "") }}
+          </div>
+          <div class="mb-3">
+            <b>{{ form.country.label(class="form-label") }}</b>
+            {{ form.country(class="form-control form-select", value=country) }}
+          </div>
+
+          <hr>
+
+          {{ render_extra_fields(form.extra) }}
+
+          <div id="results" class="mb-3">
+            <div
+                class="alert alert-success alert-dismissible submit-row" role="alert"
+                x-cloak="success" x-show="success"
+            >
+              <strong>Success!</strong>
+              Your profile has been updated
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+              </button>
+            </div>
+
+
+            <template x-for="(msg, idx) in errors" :key="idx">
+              <div class="alert alert-danger alert-dismissible" role="alert">
+                <span class="sr-only">Error:</span>
+                <span x-text="msg"></span>
+                <button
+                    type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"
+                >
+                </button>
+              </div>
+            </template>
+          </div>
+
+          <div class="mb-3">
+            {{ form.submit(class="btn btn-primary float-end px-4") }}
+          </div>
+        </form>
+      {% endwith %}
+    </div>
+
+    <div class="tab-pane fade" id="tokens" role="tabpanel">
+
+      {% with form = Forms.self.TokensForm() %}
+        <form method="POST" x-data="TokensForm" @submit.prevent="generateToken()" class="mb-3">
+          <div class="modal fade" tabindex="-1" x-ref="tokenModal">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">API Key Generated</h5>
+                  <button
+                      type="button" class="btn-close" data-bs-dismiss="modal"
+                      aria-label="Close"
+                  ></button>
+                </div>
+
+                <div class="modal-body">
+                  <p>Please copy your API Key, it won't be shown again!</p>
+
+                  <div class="input-group mb-3">
+                    <input
+                        type="text" class="form-control bg-white" x-ref="token"
+                        x-model="token" readonly
+                    >
+                    <button
+                        class="btn btn-outline-secondary px-3" type="button"
+                        @click="copyToken()"
+                    >
+                      <i class="fas fa-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Got it!
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <b>{{ form.expiration.label(class="form-label") }}</b>
+            {{ form.expiration(class="form-control") }}
+          </div>
+
+          <div class="row">
+            <div class="col">
+              {{ form.submit(class="btn btn-block btn-primary float-end px-4") }}
+            </div>
+          </div>
+        </form>
+      {% endwith %}
+
+      {% if tokens %}
+        <hr>
+
+        <h4 class="text-center mt-3">Active Tokens</h4>
+
+        {# This has to be wrapping the table modal, because div with modal will get pushed out
+           of the table and alpine ref will not work #}
+        <div x-data="Tokens">
+          <div
+              class="modal fade" x-ref="confirmModal" tabindex="-1" role="dialog"
+              aria-modal="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Delete Token</h5>
+                  <button
+                      type="button" class="btn-close" data-bs-dismiss="modal"
+                      aria-label="Close"
+                  >
+                  </button>
+                </div>
+
+                <div class="modal-body">
+                  <p>Are you sure you want to delete this token?</p>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    No
+                  </button>
+                  <button
+                      type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                      @click="deleteSelectedToken()"
+                  >Yes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <td class="text-center"><b>Created</b></td>
+              <td><b>Expiration</b></td>
+              <td><b>Delete</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for token in tokens %}
+              <tr x-ref="token-{{ token.id }}">
+                <td class="text-center">
+                  <span data-time="{{ token.created | isoformat }}"></span>
+                </td>
+                <td>
+                  <span data-time="{{ token.expiration | isoformat }}"></span>
+                </td>
+                <td class="text-center">
+                  <span
+                      class="delete-token" role="button"
+                      @click="deleteTokenModal({{ token.id }})">
+                      <i class="cursor-pointer fas fa-times"></i>
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+</div>`
+              this.createPane({
+                name: "settings",
+                title: "Settings",
+                taskbar_title: "Settings",
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/settings_gear-1.png.png",
+                hide_close: false,
+                width: "400px",
+                height: "400px",
+                transform: "translate(100px, 100px)",
+              });
+              
+            }
+
+            async closeAllPanes() {
+              this.panes.forEach((pane) => {
+                pane.close();
               });
             }
 
@@ -1247,11 +1563,11 @@
 
     <!-- Taskbar -->
     <footer class="d-flex position-relative">
-      <nav class="navbar navbar-main navbar-expand-lg navbar-dark justify-content-between navbar-footer user-select-none taskbar">
+      <nav class="navbar navbar-main navbar-expand-lg navbar-dark justify-content-between navbar-footer taskbar">
         <ul x-ref="taskbar" class="navbar-nav d-flex flex-row">
-          <li x-data="{ show_start: false }" class="nav-item start-button" @click.away="show_start = false">
+          <li class="nav-item start-button" @click.away="$store.globals.show_start = false">
             <div class="start-menu-container">
-              <div class="start-menu" x-show="show_start" style="display: none;">
+              <div class="start-menu" x-show="$store.globals.show_start" style="display: none;">
                 <div class="logo-bar">
                   <img src="/themes/uiuctf-2023-ctfd-theme/static/img/start-menu-logo-sideways.png" />
                 </div>
@@ -1262,7 +1578,7 @@
                       Challenges
                     </span>
                   </div>
-                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''">
+                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createScoreboardPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/chart1-1.png" />
                     <span>
                       Scoreboard
@@ -1286,7 +1602,7 @@
                       Info
                     </span>
                   </div>
-                  <div x-show="$store.globals.user !== null"  style="border-top: 1px solid #ffffff">
+                  <div x-show="$store.globals.user !== null"  style="border-top: 1px solid #ffffff" @click="desktop.createSettingsPane()"">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/settings_gear-1.png" />
                     <span>
                       Settings
@@ -1309,20 +1625,23 @@
                 </div>
               </div>
             </div>
-            <a class="nav-link d-flex flex-row font-weight-bold" role="button" :class="{ 'pane-focused': show_start === true }" @click="desktop.markAllUnfocused(); show_start = !show_start">
+            <a class="nav-link d-flex flex-row font-weight-bold" role="button" :class="{ 'pane-focused': $store.globals.show_start === true }" @click="desktop.markAllUnfocused(); $store.globals.show_start = !$store.globals.show_start">
               <img class="taskbar-icon" src="/themes/uiuctf-2023-ctfd-theme/static/img/uiuctf-2023-pwny.svg" />
               <div>Start</div>
             </a>
           </li>
         </ul>
-        <div id="time" class="time text-center">12:00 AM</div>
+        <div class="d-flex flex-row align-items-center">
+          <div class="mr-1 cursor-pointer font-xsmall d-flex flex-row" @click="desktop.closeAllPanes();"><div class="pt-1">Close All</div><img class="pl-1" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png" /></div>
+          <div id="time" class="time text-center">12:00 AM</div>
+        </div>
       </nav>
     </footer>
   </div>
 {% endblock %}
 
 {% block scripts %}
-  {{ Assets.js("assets/js/challenges.js") }}
+  {{ Assets.js("assets/js/desktop.js") }}
   <script type="text/javascript">
     function refreshTime() {
       const time = new Date().toLocaleTimeString([], {hour: "numeric", minute:'2-digit'});
