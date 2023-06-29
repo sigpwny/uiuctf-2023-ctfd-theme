@@ -786,7 +786,7 @@
                         </div>
                       </div>
                       <div>
-                        <a class="font-xsmall" href="{{ url_for('auth.reset_password') }}">
+                        <a class="font-xsmall" href="#" @click="desktop.createResetPasswordPane()">
                           Forgot your password?
                         </a>
                       </div>
@@ -1049,7 +1049,7 @@
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msagent-1.png",
                 hide_close: false,
                 width: "600px",
-                height: "400px",
+                height: "450px",
                 transform: "center",
               });
             }
@@ -1486,6 +1486,42 @@
                 })
             }
 
+            // Form ONLY for initial reset, not for the email callback. email callback goes back to main reset password page.
+            async createResetPasswordPane() {
+              const elem = `
+                    {% include "components/errors.html" %}
+
+                      {% with form = Forms.auth.ResetPasswordRequestForm() %}
+
+                        <form method="post" accept-charset="utf-8" autocomplete="off" role="form" class="form-horizontal"  @submit.prevent="desktop.doResetPasswordForm($event)">
+                          <p>Please provide the email address associated with your account below.</p>
+
+                          <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control ") }}
+                          </div>
+
+                          <div class="row pt-3">
+                            <div class="col-6 col-md-4 offset-6 offset-md-8">
+                              {{ form.submit(class="btn btn-block btn-primary w-100") }}
+                            </div>
+                          </div>
+
+                          {{ form.nonce() }}
+                        </form>
+
+                      {% endwith %}
+              `
+              this.createPane({
+                name: "reset_password",
+                title: "Reset Password",
+                taskbar_title: "Reset Password",
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-0.png",
+                width: "400px",
+                height: "250px",
+              });
+            }
             async createChallengePane(id) {
               const c = await window.CTFd.pages.challenges.getChallenge(id)
               if (!c) {
@@ -1695,6 +1731,29 @@
                 location.reload();
               } else {
                 this.createAlertPane({"title": 'Login Error', "content": error});
+              }
+            }
+
+            async doResetPasswordForm(event) {
+              const response = await fetch('/reset_password', {
+                method: 'POST',
+                body: new FormData(event.target)
+              })
+              const statusCode = response.status
+              const html = await response.text()
+              
+              const matches = html.match(/role="alert"[\s\S]*?span>([\s\S]*?)<\/span>/m)
+              const error = (matches && matches.length > 1) ? matches[1] : null
+              if (error === null) {
+                this.closePanes('reset_password')
+                if (statusCode === 403) {
+                  this.createAlertPane({"title": "Reset Password Error","content": "Reset Password form expired. Please try again."});
+                } else {
+                  this.createAlertPane({"title": "Reset Password Success", "type": "success", "content": "An email should be sent. If not, contact the organizers."})
+                }
+                location.reload();
+              } else {
+                this.createAlertPane({"title" : 'Reset Password Error', "content": error });
               }
             }
             async doRegisterForm(event) {
