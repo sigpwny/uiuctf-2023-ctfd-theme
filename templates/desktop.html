@@ -959,7 +959,7 @@
 
                 {% from "macros/forms.html" import render_extra_fields %}
 
-                <form method="post" accept-charset="utf-8" autocomplete="off" role="form">
+                <form method="post" accept-charset="utf-8" autocomplete="off" role="form" @submit.prevent="desktop.doRegisterForm($event)">
 
                   <div class="row">
                     <div class="col-4">
@@ -1655,11 +1655,35 @@
               if (error === null) {
                 this.closePanes('login')
                 if (statusCode === 403) {
-                  this.createAlertPane("Login Error", "Login form expired. Please try again.");
+                  this.createAlertPane({"title": "Login Error", "content": "Login form expired. Please try again."});
+                } else {
+                  this.createAlertPane({"title": "Login Success", "type": "info", "content": "Welcome back to UIUCTF 2023."})
                 }
                 location.reload();
               } else {
-                this.createAlertPane('Login Error', error);
+                this.createAlertPane({"title": 'Login Error', "content": error});
+              }
+            }
+            async doRegisterForm(event) {
+              const response = await fetch('/register', {
+                method: 'POST',
+                body: new FormData(event.target)
+              })
+              const statusCode = response.status
+              const html = await response.text()
+              
+              const matches = html.match(/role="alert"[\s\S]*?span>([\s\S]*?)<\/span>/m)
+              const error = (matches && matches.length > 1) ? matches[1] : null
+              if (error === null) {
+                this.closePanes('register')
+                if (statusCode === 403) {
+                  this.createAlertPane({"title": "Registration Error","content": "Register form expired. Please try again."});
+                } else {
+                  this.createAlertPane({"title": "Registration Success", "type": "info", "content": "Welcome to UIUCTF 2023!"})
+                }
+                location.reload();
+              } else {
+                this.createAlertPane({"title" : 'Registration Error', "content": error });
               }
             }
           }
