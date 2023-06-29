@@ -1522,6 +1522,49 @@
                 height: "250px",
               });
             }
+
+            // invite.html is not themed
+            
+            // public.html
+            async createPublicTeamPane(teamId) {
+              // Will need an API call or GET/POSTs to the real page (b/c teamID)
+            }
+
+            // teams.html
+            async createTeamListingPane() {
+              // Will need an API call or GET/POSTs to the real page (b/c paginated response)
+            }
+
+            // join_team.html
+            async createPrivateTeamJoinPane() {
+
+            }
+
+            // new_team.html
+            async createPrivateTeamCreatePane() {
+
+            }
+
+            // private.html + teams_enrollment.html
+            async createPrivateTeamPane() {
+              // This pane should either show your team, or buttons to the join/create team panes
+              const elem = `
+                  {% if privateteam_enrollment_needed %}
+                      <div class="row">
+                <div class="mt-3 col-sm-4 col-md-3 offset-sm-2 offset-md-3 text-center">
+                  <a class="btn btn-primary w-100" href="{{ url_for('teams.join') }}">Join Team</a>
+                </div>
+                <div class="mt-3 col-sm-4 col-md-3 text-center">
+                  <a class="btn btn-primary w-100" href="{{ url_for('teams.new') }}">Create Team</a>
+                </div>
+              </div>
+                {% else %}
+
+                {% endif %}
+              `
+              // TODO: add this
+            }
+
             async createChallengePane(id) {
               const c = await window.CTFd.pages.challenges.getChallenge(id)
               if (!c) {
