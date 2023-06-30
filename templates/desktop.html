@@ -42,6 +42,12 @@
     });
   </script>
   <style>
+    .score-graph {
+      min-height: 400px;
+      display: block;
+      clear: both;
+      background: white;
+    }
     /* Moveable.js overrides */
     .item-disabled {
       cursor: not-allowed !important;
@@ -448,6 +454,9 @@
                 e.target.style.transform = e.transform;
                 e.target.style.width = `${e.width}px`;
                 e.target.style.height = `${e.height}px`;
+                // Call window resize event
+                // TODO: optimize
+                window.dispatchEvent(new Event("resize"));
               });
               this.moveable.on("dragStart", e => {
                 this.desktop.bringToFront(this.target);
@@ -757,9 +766,15 @@
                 return;
               }
               saved_panes.forEach(saved_pane => {
+                /*
+                  save arg to pane params when you call create
+
+                  localstorage stores serialized pane
+
+                */
                 if (saved_pane.recreate) {
                   console.log('Restoring pane through JS:', saved_pane.name)
-                  this[saved_pane.recreate](...saved_pane.recreate_args)
+                  this[saved_pane.recreate](saved_pane)
                 } else {
                   console.log('Restoring pane:', saved_pane.name)
                   this.createPane(saved_pane)
@@ -820,10 +835,11 @@
                 hide_close: false,
                 disable_resize: true,
                 transform: "center",
+                ...params,
               });
             }
 
-            createLoginPane() {
+            createLoginPane(params) {
               const elem = `
                 {% with form = Forms.auth.LoginForm() %}
                 <form action="/login" method="post" accept-charset="utf-8" autocomplete="off" class="pb-2 user-select-none" @submit.prevent="desktop.doLoginForm($event)">
@@ -886,10 +902,11 @@
                 hide_close: false,
                 disable_resize: true,
                 transform: "center",
+                ...params,
               });
             }
 
-            createInfoPane() {
+            createInfoPane(params) {
               const elem = `
               <div class="d-flex flex-column h-100 w-100 overflow-hidden" x-data="{selected: 'about'}">
                 <h5>Welcome to <b>UIUCTF 2023</b></h5>
@@ -1014,6 +1031,7 @@
                 </div>
               </div>`
               this.createPane({
+                ...params,
                 name: "info",
                 title: "Information",
                 recreate: `createInfoPane`,
@@ -1026,7 +1044,7 @@
               });
             }
 
-            createRegisterPane() {
+            createRegisterPane(params) {
               const elem = `
               {% include "components/errors.html" %}
               {% with form = Forms.auth.RegistrationForm() %}
@@ -1104,6 +1122,7 @@
               `;
 
               this.createPane({
+                ...params,
                 name: "register",
                 title: "Register for UIUCTF 2023",
                 taskbar_title: "Register",
@@ -1119,10 +1138,10 @@
                 transform: "center",
               });
             }
-            async createScoreboardPane() {
+            async createScoreboardPane(params) {
               const elem = `
               {% include "components/errors.html" %}
-              <div id="score-graph" class="d-flex align-items-center" x-data="ScoreboardDetail" x-ref="scoregraph">
+              <div class="score-graph d-flex align-items-center" x-data="ScoreboardDetail" x-ref="scoregraph">
                 <div class="d-flex flex-column text-center">
                   <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
                   <p>Test</p>
@@ -1131,8 +1150,8 @@
 
               {% cache 60, CacheKeys.PUBLIC_SCOREBOARD_TABLE %}
                 {% if scoreboard_standings %}
-
-                  <div id="scoreboard" class="d-flex flex-row">
+                  <!-- id="scoreboard" -->
+                  <div class="d-flex flex-row"> 
                     <div class="d-flex flex-column flex-grow-1">
                       <div class="w95-input-border">
                         <table class="table table-striped">
@@ -1149,7 +1168,7 @@
                             <tr>
                               <th scope="row" class="text-center">{{ loop.index }}</th>
                               <td>
-                                <a href="#" @click="desktop.createPublicTeamPane({{ standing.account_id }}); event.stopPropagation();">
+                                <a href="#" @click="desktop.createPublicTeamPane({ PANE_TEAM_ID: {{ standing.account_id }}}); event.stopPropagation();">
                                   {{ standing.name | truncate(50) }}
 
                                   {% if standing.oauth_id %}
@@ -1173,6 +1192,8 @@
                       </div>
                     </div>
                   </div>
+                {% else %}
+                  <div> no scoreboard_standings </div>
                 {% endif %}
               {% endcache %}
               `
@@ -1185,6 +1206,7 @@
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/chart1-1.png",
                 width: "400px",
                 height: "600px",
+                ...params,
               });
             }
 
@@ -1440,11 +1462,12 @@
                 width: "400px",
                 height: "400px",
                 transform: "translate(100px, 100px)",
+                ...params
               });
               
             }
 
-            async createConfirmClosePane() {
+            async createConfirmClosePane(params) {
               this.createPane({
                 name: "close",
                 title: "Confirm Close All",
@@ -1472,9 +1495,10 @@
                 disable_resize: true,
                 hide_close: false,
                 transform: "center",
+                ...params
               });
             }
-            async createChallengesPane() {
+            async createChallengesPane(params) {
               // <div
               //   x-data="ChallengeBoard"
               //   @load-challenges.window="loadChallenges()"
@@ -1512,7 +1536,7 @@
                                   class="d-flex flex-column text-center mx-auto"
                                   style="width: 64px;"
                                   onclick="/* TODO: highlight icon/text (and remove when unclicked), on mobile open challenge */"
-                                  @click="desktop.createChallengePane(c.id); event.stopPropagation();"
+                                  @click="desktop.createChallengePane({ id: c.id }); event.stopPropagation();"
                                 >
                                   <img
                                     :value="c.id"
@@ -1544,12 +1568,7 @@
               window.CTFd.fetch("/api/v1/challenges")
                 .then(response => response.json())
                 .then(data => {
-                  if (!data.success) {
-                    this.createAlertPane({
-                      title: "403 Error",
-                      content: `/challenges is not accessible.<br/><br/>Access is denied.<br/><br/>You may need to <a href="#" @click="desktop.createLoginPane(); event.stopPropagation();">log in</a>, or <a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">be on a team</a>.`,
-                    });
-                  }
+                  
                 this.createPane({
                   name: "challenges",
                   title: "Challenges",
@@ -1560,12 +1579,19 @@
                   width: "600px",
                   height: "400px",
                   disable_padding: true,
+                  ...params
                 });
+                if (!data.success) {
+                    this.createAlertPane({
+                      title: "403 Error",
+                      content: `/challenges is not accessible.<br/><br/>Access is denied.<br/><br/>You may need to <a href="#" @click="desktop.createLoginPane(); event.stopPropagation();">log in</a>, or <a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">be on a team</a>.`,
+                    });
+                  }
                 });
             }
 
             // Form ONLY for initial reset, not for the email callback. email callback goes back to main reset password page.
-            async createResetPasswordPane() {
+            async createResetPasswordPane(params) {
               const elem = `
                 {% include "components/errors.html" %}
                 {% with form = Forms.auth.ResetPasswordRequestForm() %}
@@ -1597,13 +1623,14 @@
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-0.png",
                 hide_maximize: true,
                 disable_resize: true,
+                ...params
               });
             }
 
             // invite.html is not themed
             
             // public.html
-            async createPublicTeamPane(PANE_TEAM_ID) {
+            async createPublicTeamPane({ PANE_TEAM_ID, ...params }) {
               // Will need an API call or GET/POSTs to the real page (b/c teamID)
               const elem = `
   <div x-data="TeamGraphsPublic(${PANE_TEAM_ID})">
@@ -1664,7 +1691,7 @@
           <template x-for="member in (members.data || [])">
             <tr>
               <td>
-                <a @click="desktop.createPublicUserPane(member.id); event.stopPropagation();" href="#" x-text="member.name"></a>
+                <a @click="desktop.createPublicUserPane({ PANE_USER_ID: member.id }); event.stopPropagation();" href="#" x-text="member.name"></a>
               </td>
               <td x-text="member.points"></td>
             </tr>
@@ -1713,7 +1740,7 @@
             <template x-for="solve in (solves?.data || [])">
               <tr>
                 <td class="text-center">
-                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id); event.stopPropagation();">
+                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane({ id: solve.challenge.id }); event.stopPropagation();">
                   </a>
                 </td>
                 <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
@@ -1783,7 +1810,7 @@
         <br class="clearfix">
 
         <div class="col-md-12 d-block">
-          <div id="score-graph" x-ref="scoregraph" class="w-100 d-flex align-items-center">
+          <div x-ref="scoregraph" class="score-graph w-100 d-flex align-items-center">
             <div class="text-center w-100">
               <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
             </div>
@@ -1811,10 +1838,11 @@
                 transform: "center",
                 width: "400px",
                 height: "500px",
+                ...params
               });
             }
 
-            async createPublicUserPane(PANE_USER_ID) {
+            async createPublicUserPane({PANE_USER_ID, ...params}) {
               const elem = `
               <div x-data="UserGraphsPublic(${PANE_USER_ID})">
 
@@ -1822,7 +1850,7 @@
     <h1 x-text="user.data.name"></h1>
 
       <h2 x-show="user.data.team_id">
-        <a href="#" @click="desktop.createPublicTeamPane(user.data.team_id); event.stopPropagation();">
+        <a href="#" @click="desktop.createPublicTeamPane({ PANE_TEAM_ID: user.data.team_id }); event.stopPropagation();">
           <span class="badge bg-secondary" x-text="team.data.name">
           </span>
         </a>
@@ -1877,7 +1905,7 @@
             <template x-for="solve in solves.data">
               <tr>
                 <td class="text-center">
-                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id); event.stopPropagation();">
+                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane({ id: solve.challenge.id }); event.stopPropagation();">
                   </a>
                 </td>
                 <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
@@ -1975,11 +2003,8 @@
                 transform: "center",
                 width: "400px",
                 height: "500px",
+                ...params
               });
-              // Rebuild please
-              console.log('built again?!')
-              console.log('built again!?!')
-
             }
 
             // teams.html
@@ -2014,7 +2039,7 @@
               }
             }
 
-            async createPrivateTeamJoinPane() {
+            async createPrivateTeamJoinPane(params) {
               const elem = `
               <div>
 
@@ -2054,6 +2079,7 @@
                 transform: "center",
                 width: "600px",
                 height: "400px",
+                ...params
               });
               // /teams/join
             }
@@ -2085,7 +2111,7 @@
               }
             }
             // new_team.html
-            async createPrivateTeamCreatePane() {
+            async createPrivateTeamCreatePane(params) {
               const elem = `
               <div>
                 {% include "components/errors.html" %}
@@ -2129,12 +2155,13 @@
                 transform: "center",
                 width: "600px",
                 height: "400px",
+                ...params
               });
               // /teams/new
             }
 
             // private.html + teams_enrollment.html
-            async createPrivateTeamPane() {
+            async createPrivateTeamPane(params) {
               // This pane should either show your team, or buttons to the join/create team panes
               const elem = `
                   {% if privateteam_enrollment_needed %}
@@ -2247,7 +2274,7 @@
           {% for member in ((team or {}).members or []) %}
             <tr>
               <td>
-                <a href="#" @click="desktop.createPublicUserPane({{ member.id }}); event.stopPropagation();">
+                <a href="#" @click="desktop.createPublicUserPane({ PANE_USER_ID: {{ member.id }}}); event.stopPropagation();">
                   {{ member.name }}
                 </a>
                 {% if team and team.captain_id == member.id %}
@@ -2287,7 +2314,7 @@
           {% for solve in privateteam_solves %}
             <tr>
               <td>
-                <a href="#" @click="desktop.createChallengePane({{ solve.challenge.id }}); event.stopPropagation();">
+                <a href="#" @click="desktop.createChallengePane({ id: {{ solve.challenge.id }}}); event.stopPropagation();">
                   {{ solve.challenge.name }}
                 </a>
               </td>
@@ -2388,10 +2415,11 @@
                 transform: "center",
                 width: "600px",
                 height: "200px",
+                ...params
               });
             }
 
-            async createPrivateUserPane() {
+            async createPrivateUserPane(params) {
               const elem = `
               <div>
       <div class="d-flex flex-column">
@@ -2512,7 +2540,7 @@
             {% for solve in solves %}
               <tr>
                 <td>
-                  <a href="#" @click="desktop.createChallengePane({{ solve.challenge.id }}); event.stopPropagation();">
+                  <a href="#" @click="desktop.createChallengePane({ id: {{ solve.challenge.id }}}); event.stopPropagation();">
                     {{ solve.challenge.name }}
                   </a>
                 </td>
@@ -2609,9 +2637,10 @@
                 transform: "center",
                 width: "400px",
                 height: "500px",
+                ...params
               });
             }
-            async createChallengePane(id) {
+            async createChallengePane({ id, ...params }) {
               const c = await window.CTFd.pages.challenges.getChallenge(id)
               if (!c) {
                 this.createAlertPane({
@@ -2740,7 +2769,7 @@
             <template x-for="solve in solves">
               <tr>
                 <td>
-                  <p class="mb-0"><a @click="desktop.createPublicTeamPane(solve.account_id); event.stopPropagation();" href="#" x-text="solve.name"></a></p>
+                  <p class="mb-0"><a @click="desktop.createPublicTeamPane({ PANE_TEAM_ID: solve.account_id }); event.stopPropagation();" href="#" x-text="solve.name"></a></p>
                 </td>
                 <td>
                   <p class="mb-0" x-text="solve.date"></p>
@@ -2799,6 +2828,7 @@
                 transform: "center",
                 width: "400px",
                 height: "500px",
+                ...params
               });
             }
 
