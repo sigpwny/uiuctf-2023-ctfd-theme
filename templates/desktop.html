@@ -822,7 +822,9 @@
                           {{ form.name.label(class="form-label") }}
                         </div>
                         <div class="col-8">
-                          {{ form.name(class="form-control", value=name) }}
+                          <div class="w95-input-border">
+                            {{ form.name(class="form-control", value=name) }}
+                          </div>
                         </div>
                       </div>
                       <div class="row">
@@ -830,7 +832,9 @@
                           {{ form.password.label(class="form-label") }}
                         </div>
                         <div class="col-8">
-                          {{ form.password(class="form-control", value=password) }}
+                          <div class="w95-input-border">
+                            {{ form.password(class="form-control", value=password) }}
+                          </div>
                         </div>
                       </div>
                       <div>
@@ -1018,7 +1022,9 @@
                             <span>{{ form.name.label(class="form-label") }}</span>
                           </div>
                           <div class="col d-flex flex-column">
-                            {{ form.name(class="form-control", value=name) }}
+                            <div class="w95-input-border">
+                              {{ form.name(class="form-control", value=name) }}
+                            </div>
                             <small class="font-xsmall text-muted">
                               Your username on the site
                             </small>
@@ -1029,7 +1035,9 @@
                             <span>{{ form.email.label(class="form-label") }}</span>
                           </div>
                           <div class="col d-flex flex-column">
-                            {{ form.email(class="form-control", value=email) }}
+                            <div class="w95-input-border">
+                              {{ form.email(class="form-control", value=email) }}
+                            </div>
                             <small class="font-xsmall text-muted">
                               Never shown to the public
                             </small>
@@ -1040,7 +1048,9 @@
                             <span>{{ form.password.label(class="form-label") }}</span>
                           </div>
                           <div class="col d-flex flex-column">
-                            {{ form.password(class="form-control", value=password) }}
+                            <div class="w95-input-border">
+                              {{ form.password(class="form-control", value=password) }}
+                            </div>
                             <small class="font-xsmall text-muted">
                               Password used to log into your account
                             </small>
@@ -1054,9 +1064,7 @@
                             and <a href="{{ Configs.tos_link }}" rel="noopener" target="_blank">terms of service</a>
                           </p>
                         {% endif %}
-                        <div class="row pt-4">
-                          <p>To continue, click Next.</p>
-                        </div>
+                        <p class="pt-4">To continue, click Next.</p>
                       </div>
                     </div>
                   </div>
@@ -1533,28 +1541,26 @@
             // Form ONLY for initial reset, not for the email callback. email callback goes back to main reset password page.
             async createResetPasswordPane() {
               const elem = `
-                    {% include "components/errors.html" %}
-
-                      {% with form = Forms.auth.ResetPasswordRequestForm() %}
-
-                        <form method="post" accept-charset="utf-8" autocomplete="off" role="form" class="form-horizontal"  @submit.prevent="desktop.doResetPasswordForm($event)">
-                          <p>Please provide the email address associated with your account below.</p>
-
-                          <div class="mb-3">
-                            {{ form.email.label(class="form-label") }}
-                            {{ form.email(class="form-control ") }}
-                          </div>
-
-                          <div class="row pt-3">
-                            <div class="col-6 col-md-4 offset-6 offset-md-8">
-                              {{ form.submit(class="btn btn-block btn-primary w-100") }}
-                            </div>
-                          </div>
-
-                          {{ form.nonce() }}
-                        </form>
-
-                      {% endwith %}
+                {% include "components/errors.html" %}
+                {% with form = Forms.auth.ResetPasswordRequestForm() %}
+                  <form method="post" accept-charset="utf-8" autocomplete="off" role="form" @submit.prevent="desktop.doResetPasswordForm($event)">
+                    <div class="d-flex flex-column flex-grow-1">
+                      <p>Please provide the email address associated with your account below.</p>
+                      <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        <div class="w95-input-border">
+                          {{ form.email(class="form-control ") }}
+                        </div>
+                      </div>
+                      <div class="d-flex flex-row flex-grow-1 justify-content-end">
+                        <button class="btn btn-sm btn-primary" id="_submit" name="_submit" type="submit" value="Submit">
+                          <span class="btn-text">Submit</span>
+                        </button>
+                      </div>
+                    </div>
+                    {{ form.nonce() }}
+                  </form>
+                {% endwith %}
               `
               this.createPane({
                 name: "reset_password",
@@ -1562,8 +1568,8 @@
                 taskbar_title: "Reset Password",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-0.png",
-                width: "400px",
-                height: "250px",
+                hide_maximize: true,
+                disable_resize: true,
               });
             }
 
