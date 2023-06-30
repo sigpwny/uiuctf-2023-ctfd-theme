@@ -1911,6 +1911,29 @@
             }
 
             // join_team.html
+            async doTeamJoinForm(event) {
+              const response = await fetch('/teams/join', {
+                method: 'POST',
+                body: new FormData(event.target)
+              })
+              const statusCode = response.status
+              const html = await response.text()
+              
+              const matches = html.match(/role="alert"[\s\S]*?span>([\s\S]*?)<\/span>/m)
+              const error = (matches && matches.length > 1) ? matches[1] : null
+              if (error === null) {
+                this.closePanes('team_join')
+                if (statusCode === 403) {
+                  this.createAlertPane({"title": "Team Join Error","content": "Team Join form expired. Please try again."});
+                } else {
+                  this.createAlertPane({"title": "Team Join Success", "type": "success", "content": "You successfully joined the team."})
+                }
+                location.reload();
+              } else {
+                this.createAlertPane({"title" : 'Team Join Error', "content": error });
+              }
+            }
+
             async createPrivateTeamJoinPane() {
               const elem = `
               <div>
@@ -1918,7 +1941,7 @@
               {% include "components/errors.html" %}
 
               {% with form = Forms.teams.TeamJoinForm() %}
-                <form method="POST">
+                <form method="POST" @submit.prevent="desktop.doTeamJoinForm($event)">
                   <div class="mb-3">
                     {{ form.name.label(class="form-label") }}
                     {{ form.name(class="form-control") }}
@@ -1939,8 +1962,43 @@
               {% endwith %}
               </div>
               `
+              this.createPane({
+                name: "team_join",
+                title: `Team Join`,
+                taskbar_title: `Team Join`,
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                hide_maximize: true,
+                disable_resize: false,
+                transform: "center",
+                width: "600px",
+                height: "400px",
+              });
+              // /teams/join
             }
 
+            async doTeamCreateForm(event) {
+              const response = await fetch('/teams/new', {
+                method: 'POST',
+                body: new FormData(event.target)
+              })
+              const statusCode = response.status
+              const html = await response.text()
+              
+              const matches = html.match(/role="alert"[\s\S]*?span>([\s\S]*?)<\/span>/m)
+              const error = (matches && matches.length > 1) ? matches[1] : null
+              if (error === null) {
+                this.closePanes('team_create')
+                if (statusCode === 403) {
+                  this.createAlertPane({"title": "Team Create Error","content": "Team Create form expired. Please try again."});
+                } else {
+                  this.createAlertPane({"title": "Team Create Success", "type": "success", "content": "You successfully joined the team."})
+                }
+                location.reload();
+              } else {
+                this.createAlertPane({"title" : 'Team Create Error', "content": error });
+              }
+            }
             // new_team.html
             async createPrivateTeamCreatePane() {
               const elem = `
@@ -1949,7 +2007,7 @@
 
                 {% with form = Forms.teams.TeamRegisterForm() %}
                   {% from "macros/forms.html" import render_extra_fields %}
-                  <form method="POST">
+                  <form method="POST" @submit.prevent="desktop.doTeamCreateForm($event)">
                     <div class="mb-3">
                       <b>{{ form.name.label(class="form-label") }}</b>
                       {{ form.name(class="form-control") }}
@@ -1973,6 +2031,20 @@
                 {% endwith %}
               </div>
               `
+
+              this.createPane({
+                name: "team_create",
+                title: `Team Create`,
+                taskbar_title: `Team Create`,
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                hide_maximize: true,
+                disable_resize: false,
+                transform: "center",
+                width: "600px",
+                height: "400px",
+              });
+              // /teams/new
             }
 
             // private.html + teams_enrollment.html
@@ -1982,10 +2054,10 @@
                   {% if privateteam_enrollment_needed %}
                       <div class="row">
                 <div class="mt-3 col-sm-4 col-md-3 offset-sm-2 offset-md-3 text-center">
-                  <a class="btn btn-primary w-100" href="{{ url_for('teams.join') }}">Join Team</a>
+                  <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamCreatePane()">Join Team</a>
                 </div>
                 <div class="mt-3 col-sm-4 col-md-3 text-center">
-                  <a class="btn btn-primary w-100" href="{{ url_for('teams.new') }}">Create Team</a>
+                  <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamJoinPane()"">Create Team</a>
                 </div>
               </div>
                 {% else %}
