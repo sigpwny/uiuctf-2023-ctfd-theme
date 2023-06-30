@@ -794,7 +794,7 @@
                         </div>
                       </div>
                       <div>
-                        <a class="font-xsmall" href="#" @click="desktop.createResetPasswordPane()">
+                        <a class="font-xsmall" href="#" @click="desktop.createResetPasswordPane(); event.stopPropagation();">
                           Forgot your password?
                         </a>
                       </div>
@@ -1079,7 +1079,7 @@
                           <tr>
                             <th scope="row" class="text-center">{{ loop.index }}</th>
                             <td>
-                              <a href="#" @click="desktop.createPublicTeamPane({{ standing.account_id }})">
+                              <a href="#" @click="desktop.createPublicTeamPane({{ standing.account_id }}); event.stopPropagation();">
                                 {{ standing.name | truncate(50) }}
 
                                 {% if standing.oauth_id %}
@@ -1581,7 +1581,7 @@
           <template x-for="member in members.data">
             <tr>
               <td>
-                <a @click="desktop.createPublicUserPane(member.id)" href="#" x-text="member.name"></a>
+                <a @click="desktop.createPublicUserPane(member.id); event.stopPropagation();" href="#" x-text="member.name"></a>
               </td>
               <td x-text="member.score"></td>
             </tr>
@@ -1630,7 +1630,7 @@
             <template x-for="solve in solves.data">
               <tr>
                 <td class="text-center">
-                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id)">
+                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id); event.stopPropagation();">
                   </a>
                 </td>
                 <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
@@ -1739,7 +1739,7 @@
     <h1 x-text="user.data.name"></h1>
 
       <h2 x-show="user.data.team_id">
-        <a href="#" @click="desktop.createPublicTeamPane(user.data.team_id)">
+        <a href="#" @click="desktop.createPublicTeamPane(user.data.team_id); event.stopPropagation();">
           <span class="badge bg-secondary" x-text="team.data.name">
           </span>
         </a>
@@ -1797,7 +1797,7 @@
             <template x-for="solve in solves.data">
               <tr>
                 <td class="text-center">
-                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id)">
+                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id); event.stopPropagation();">
                   </a>
                 </td>
                 <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
@@ -2049,34 +2049,34 @@
                   {% if privateteam_enrollment_needed %}
                       <div class="row">
                 <div class="mt-3 col-sm-4 col-md-3 offset-sm-2 offset-md-3 text-center">
-                  <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamJoinPane()">Join Team</a>
+                  <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamJoinPane(); event.stopPropagation();">Join Team</a>
                 </div>
                 <div class="mt-3 col-sm-4 col-md-3 text-center">
-                  <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamCreatePane()"">Create Team</a>
+                  <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamCreatePane(); event.stopPropagation();">Create Team</a>
                 </div>
               </div>
-                {% else %}
+                {% elif team != None %}
                 <div class="d-flex flex-row h-100" x-data="{ selected: 'info' }">
     <!-- Panels -->
     <div class="info-panel d-flex flex-column p-3 w-100 h-100">
   <template x-if="selected == 'info'">
     <div>
       <div class="d-flex flex-row justify-content-center">
-        <h3 id="team-id" team-id="{{ team.id }}">{{ team.name }}</h3>
+        <h3 id="team-id" team-id="{{ team.id if team else None }}">{{ team.name if team else None }}</h3>
       </div>
-      {% if team.oauth_id %}
+      {% if team and team.oauth_id %}
         <a href="https://majorleaguecyber.org/t/{{ team.name }}">
           <h3><span class="badge bg-primary">Official</span></h3>
         </a>
       {% endif %}
 
-      {% if team.affiliation %}
+      {% if team and team.affiliation %}
         <h3 class="d-inline-block">
           <span class="badge bg-primary">{{ team.affiliation }}</span>
         </h3>
       {% endif %}
 
-      {% if team.country %}
+      {% if team and team.country %}
         <h3 class="d-inline-block">
           <span class="badge bg-primary">
             <i class="flag-{{ team.country.lower() }}"></i>
@@ -2084,12 +2084,6 @@
           </span>
         </h3>
       {% endif %}
-
-      {% for field in team.fields %}
-        <h3 class="d-block">
-          {{ field.name }}: {{ field.value }}
-        </h3>
-      {% endfor %}
 
       <div class="d-flex flex-row">
 
@@ -2128,7 +2122,7 @@
         </button>
       </div>
 
-      <div class="pt-3">{% if team.website and (team.website.startswith('http://') or team.website.startswith('https://')) %}
+      <div class="pt-3">{% if team and team.website and (team.website.startswith('http://') or team.website.startswith('https://')) %}
           <a href="{{ team.website }}" target="_blank" style="color: inherit;" rel="noopener">
             <i
                 class="fas fa-external-link-alt fa-2x px-2 pt-2"
@@ -2155,14 +2149,13 @@
           </tr>
           </thead>
           <tbody>
-
-          {% for member in team.members %}
+          {% for member in ((team or {}).members or []) %}
             <tr>
               <td>
-                <a href="#" @click="desktop.createPublicUserPane({{ member.id }})">
+                <a href="#" @click="desktop.createPublicUserPane({{ member.id }}); event.stopPropagation();">
                   {{ member.name }}
                 </a>
-                {% if team.captain_id == member.id %}
+                {% if team and team.captain_id == member.id %}
                   <span class="badge bg-primary ms-2">Captain</span>
                 {% endif %}
               </td>
@@ -2199,7 +2192,7 @@
           {% for solve in privateteam_solves %}
             <tr>
               <td>
-                <a href="#" @click="desktop.createChallengePane({{ solve.challenge.id }})">
+                <a href="#" @click="desktop.createChallengePane({{ solve.challenge.id }}); event.stopPropagation();">
                   {{ solve.challenge.name }}
                 </a>
               </td>
@@ -2357,12 +2350,12 @@
 
       <div class="d-flex flex-row">
         <h2>
-          {% if privateuser_account.place %}
+          {% if privateuser_account and privateuser_account.place %}
             {{ privateuser_account.place }} <small>place</small>
           {% endif %}
         </h2>
         <h2 class="pl-3">
-          {% if privateuser_account.place %}
+          {% if privateuser_account and privateuser_account.place %}
             {{ privateuser_account.score }} <small>points</small>
           {% endif %}
         </h2>
@@ -2381,7 +2374,7 @@
     {% include "components/errors.html" %}
 
     {% set solves = user.solves %}
-    {% set awards = user.awards %}
+    {% set awards = user.awards or [] %}
 
     {% if solves or awards %}
       {% if awards %}
@@ -2423,7 +2416,7 @@
             {% for solve in solves %}
               <tr>
                 <td>
-                  <a href="#" @click="desktop.createChallengePane({{ solve.challenge.id }})">
+                  <a href="#" @click="desktop.createChallengePane({{ solve.challenge.id }}); event.stopPropagation();">
                     {{ solve.challenge.name }}
                   </a>
                 </td>
@@ -2643,7 +2636,7 @@
           <template x-for="solve in solves">
             <tr>
               <td>
-                <p class="mb-0"><a @click="desktop.createPublicTeamPane(solve.account_id)" href="#" x-text="solve.name"></a></p>
+                <p class="mb-0"><a @click="desktop.createPublicTeamPane(solve.account_id); event.stopPropagation();" href="#" x-text="solve.name"></a></p>
               </td>
               <td>
                 <p class="mb-0" x-text="solve.date"></p>
