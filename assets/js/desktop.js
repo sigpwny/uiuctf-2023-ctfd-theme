@@ -365,7 +365,7 @@ Alpine.data("Tokens", () => ({
 
 /* Profile Page */
 
-Alpine.data("PrivateUserGraphs", () => ({
+Alpine.data("UserGraphs", () => ({
   solves: null,
   fails: null,
   awards: null,

@@ -1,6 +1,6 @@
 {
   "assets/js/desktop.js": {
-    "file": "assets/desktop.6cbda775.js",
+    "file": "assets/desktop.6de852bf.js",
     "src": "assets/js/desktop.js",
     "isEntry": true,
     "imports": [
@@ -147,31 +147,6 @@
   "_echarts.128204f2.js": {
     "file": "assets/echarts.128204f2.js"
   },
-  "_index.832c4d63.js": {
-    "file": "assets/index.832c4d63.js",
-    "imports": [
-      "assets/js/index.js",
-      "_echarts.128204f2.js"
-    ]
-  },
-  "_clipboard.e3e7c63e.js": {
-    "file": "assets/clipboard.e3e7c63e.js",
-    "imports": [
-      "assets/js/index.js"
-    ]
-  },
-  "_userscore.a1a1c4b4.js": {
-    "file": "assets/userscore.a1a1c4b4.js",
-    "imports": [
-      "assets/js/index.js",
-      "_index.832c4d63.js"
-    ]
-  },
-  "assets/scss/main.scss": {
-    "file": "assets/main.776ccc78.css",
-    "src": "assets/scss/main.scss",
-    "isEntry": true
-  },
   "_index.4d677054.js": {
     "file": "assets/index.4d677054.js",
     "imports": [
@@ -191,5 +166,10 @@
       "assets/js/index.js",
       "_index.4d677054.js"
     ]
+  },
+  "assets/scss/main.scss": {
+    "file": "assets/main.776ccc78.css",
+    "src": "assets/scss/main.scss",
+    "isEntry": true
   }
 }
