@@ -3951,6 +3951,28 @@ input[type="text"]:disabled {
   pointer-events: none;
 }
 
+.w95-section-border {
+  position: relative;
+  border: 2px solid #ffffff;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow:
+    #808080 -1px -1px 0px 1px,
+    #808080 -1px -1px 0px 1px inset;
+}
+
+.w95-section-legend {
+  display: flex;
+  position: absolute;
+  top: 0px;
+  left: 0.5rem;
+  transform: translateY(calc(-50% - 2px));
+  margin: 0;
+  padding: 0px 0.5rem;
+  font-size: 0.6rem;
+  background: #c0c0c0;
+}
+
 .form-group-input {
   position: relative;
 }

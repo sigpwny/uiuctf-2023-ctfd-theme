@@ -2614,13 +2614,15 @@
         if (c.hints.length > 0) {
           // Sort hints by cost
           const hints = c.hints.sort((a, b) => a.cost - b.cost);
+          hint_html += `<div class="w95-section-border"><p class="w95-section-legend">Hints</p>`;
           hints.forEach((h, idx) => {
             if (h.content) {
-              hint_html += `<p class="mb-0">Hint ${idx}:</p>${marked.parse(h.content)}`;
+              hint_html += `<p class="m-0">Hint ${idx}:</p>${marked.parse(h.content)}`;
             } else {
               hint_html += `
+                <p class="m-0">Hint ${idx}:</p>
                 <div class="d-flex flex-row justify-content-between align-items-center">
-                  <p class="mb-1">Hint ${idx}: Unlock for ${h.cost} points</p>
+                  <p class="m-0">Unlock for ${h.cost} points</p>
                   <button class="btn btn-sm btn-primary" @click="unlockHint(${h.id})">
                     <span class="btn-text">Unlock</span>
                   </button>
@@ -2628,6 +2630,7 @@
               `;
             }
           })
+          hint_html += `</div>`;
         }
         return hint_html;
       })()}
@@ -2635,20 +2638,21 @@
       ${(() => {
         let files_html = "";
         if (c.files.length > 0) {
-          files_html += `<p class="mb-0">Files</p>`;
+          files_html += `<div class="w95-section-border"><p class="w95-section-legend">Files</p>`;
           c.files.forEach(filepath => {
             const filename = filepath.split("/").pop().split("?")[0];
             files_html += `
-              <div class="d-flex flex-row justify-content-between align-items-center mb-1">
-                <p class="mb-1">${filename}</p>
-                <a href="${filepath}" target="_blank" rel="noopener">
-                  <button class="btn btn-sm btn-primary">
-                    <span class="btn-text">Download</span>
-                  </button>
-                </a>
-              </div>
+            <div class="d-flex flex-row justify-content-between align-items-center mb-1">
+              <p class="m-0">${filename}</p>
+              <a href="${filepath}" target="_blank" rel="noopener">
+                <button class="btn btn-sm btn-primary">
+                  <span class="btn-text">Download</span>
+                </button>
+              </a>
+            </div>
             `;
           })
+          files_html += `</div>`;
         }
         return files_html;
       })()}
