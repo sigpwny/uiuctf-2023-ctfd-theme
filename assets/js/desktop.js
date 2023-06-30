@@ -119,6 +119,10 @@ Alpine.data("Challenge", () => ({
     new Tab(this.$el).show();
   },
 
+  async loadSolves() {
+    this.solves = await CTFd.pages.challenge.loadSolves(this.id);
+  },
+
   getNextId() {
     let data = Alpine.store("challenge").data;
     return data.next_id;

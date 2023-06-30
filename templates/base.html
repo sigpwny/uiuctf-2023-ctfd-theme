@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ Configs.ctf_small_icon }}" type="image/x-icon">
+
   {% block stylesheets %}
     {{ Assets.css("assets/scss/main.scss") }}
   {% endblock %}
@@ -32,17 +33,22 @@
   </script>
 
   {{ Configs.theme_header }}
-  {% block head %}
-  {% endblock %}
 </head>
 <body>
+{% include "components/navbar.html" %}
 
-{% block page %}
 <main role="main">
   {% block content %}
   {% endblock %}
 </main>
-{% endblock %}
+
+<footer class="footer">
+  <div class="container text-center">
+    <a href="https://ctfd.io" class="text-secondary">
+      <small class="text-muted">Powered by CTFd</small>
+    </a>
+  </div>
+</footer>
 
 {% include "components/notifications.html" %}
 

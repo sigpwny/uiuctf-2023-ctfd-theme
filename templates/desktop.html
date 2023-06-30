@@ -1,4 +1,34 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ Configs.ctf_name }}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="{{ Configs.ctf_small_icon }}" type="image/x-icon">
+
+  {{ Plugins.styles }}
+
+  <script type="text/javascript">
+      window.init = {
+          'urlRoot': "{{ request.script_root }}",
+          'csrfNonce': "{{ Session.nonce }}",
+          'userMode': "{{ Configs.user_mode }}",
+          'userId': {{ Session.id }},
+          'userName': {{ User.name | tojson }},
+          'userEmail': {{ User.email | tojson }},
+          'teamId': {{ Team.id | tojson }}, 
+          'teamName': {{ Team.name | tojson }},
+          'start': {{ Configs.start | tojson }},
+          'end': {{ Configs.end | tojson }},
+          'themeSettings': {{ Configs.theme_settings | tojson }},
+          'eventSounds': [
+            "/themes/core/static/sounds/notification.webm",
+            "/themes/core/static/sounds/notification.mp3",
+          ],
+      }
+  </script>
+
+  {{ Configs.theme_header }}
 
 {% block head %}
   <link rel="stylesheet prefetch" href="/themes/uiuctf-2023-ctfd-theme/static/windows-95-ui-kit/css/bootstrap.min.css">
@@ -58,7 +88,6 @@
       position: absolute;
       height: 238px;
       width: 164px;
-      /* background-color: red; */
     }
 
     .start-menu {
@@ -126,6 +155,7 @@
     }
 
     .card-header-content {
+      font-weight: bold;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -157,6 +187,10 @@
     }
     .close-icon {
       margin-left: 0.125rem;
+    }
+
+    .user-select-none {
+      user-select: none !important;
     }
 
     .info-panel {
@@ -2548,6 +2582,8 @@
         id="${elem_id}_tab_solves"
         data-bs-target="#${elem_id}_tabcontent_solves"
         @click="showSolves()"
+        x-init="loadSolves()"
+        x-text="solves.length + ' Solve' + (solves.length != 1 ? 's' : '')"
       >
         ${c.solves} Solve${c.solves != 1 ? "s" : ""}
       </a>
@@ -2621,30 +2657,32 @@
       id="${elem_id}_tabcontent_solves"
       aria-labelledby="${elem_id}_tabcontent_solves"
     >
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <td>
-              <p class="mb-0"><b>Name</b></p>
-            </td>
-            <td>
-              <p class="mb-0"><b>Date</b></p>
-            </td>
-          </tr>
-        </thead>
-        <tbody id="challenge-solves-names">
-          <template x-for="solve in solves">
+      <div class="w95-input-border">
+        <table class="table table-striped">
+          <thead>
             <tr>
               <td>
-                <p class="mb-0"><a @click="desktop.createPublicTeamPane(solve.account_id); event.stopPropagation();" href="#" x-text="solve.name"></a></p>
+                <span><b>Name</b></span>
               </td>
               <td>
-                <p class="mb-0" x-text="solve.date"></p>
+                <span><b>Date</b></span>
               </td>
             </tr>
-          </template>
-        </tbody>
-      </table>
+          </thead>
+          <tbody id="challenge-solves-names">
+            <template x-for="solve in solves">
+              <tr>
+                <td>
+                  <p class="mb-0"><a @click="desktop.createPublicTeamPane(solve.account_id); event.stopPropagation();" href="#" x-text="solve.name"></a></p>
+                </td>
+                <td>
+                  <p class="mb-0" x-text="solve.date"></p>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
       <div class="d-flex flex-column mt-3">
@@ -2654,15 +2692,17 @@
           class="challenge-id"
           value="${c.id}"
         />
-        <input
-          id="${elem_id}_challenge-input"
-          type="text"
-          class="challenge-input form-control"
-          x-model="submission"
-          @keyup.enter="submitChallenge()"
-          placeholder="${c.solved_by_me ? "Challenge solved!" : "uiuctf{...}"}"
-          ${c.solved_by_me ? "disabled" : ""}
-        />
+        <div class="w95-input-border">
+          <input
+            id="${elem_id}_challenge-input"
+            type="text"
+            class="challenge-input form-control"
+            x-model="submission"
+            @keyup.enter="submitChallenge()"
+            placeholder="${c.solved_by_me ? "Challenge solved!" : "uiuctf{...}"}"
+            ${c.solved_by_me ? "disabled" : ""}
+          />
+        </div>
         <div class="d-flex flex-row justify-content-between mt-1">
           <div>
             <template x-if="response">
@@ -2786,6 +2826,9 @@
     })
   </script>
 {% endblock head %}
+
+</head>
+<body>
 <!-- End base -->
 
 {% block page %}
@@ -3018,7 +3061,7 @@
                 <div class="main-options">
                   <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createChallengesPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png" />
-                    <span>
+                    <span class="user-select-none">
                       Challenges
                     </span>
                   </div>
@@ -3088,6 +3131,7 @@
 {% endblock %}
 
 {% block scripts %}
+  {{ Assets.js("assets/js/index.js") }}
   {{ Assets.js("assets/js/desktop.js") }}
   <script type="text/javascript">
     function refreshTime() {
@@ -3100,3 +3144,11 @@
     }
   </script>
 {% endblock %}
+
+{% include "components/notifications.html" %}
+
+{{ Plugins.scripts }}
+
+{{ Configs.theme_footer }}
+</body>
+</html>
