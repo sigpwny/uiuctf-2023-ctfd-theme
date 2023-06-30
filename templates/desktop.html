@@ -203,6 +203,10 @@
       background: #feffd1;
       overflow: auto;
     }
+
+    .modal-backdrop {
+      z-index: -1; /* no more unclicky */
+    }
   </style>
 
   <script type="text/javascript">
@@ -1275,7 +1279,7 @@
 
       {% with form = Forms.self.TokensForm() %}
         <form method="POST" x-data="TokensForm" @submit.prevent="generateToken()" class="mb-3">
-          <div class="modal fade" tabindex="-1" x-ref="tokenModal">
+          <div class="modal" tabindex="-1" x-ref="tokenModal">
             <div class="modal-dialog modal-lg">
               <div class="modal-content">
                 <div class="modal-header">
@@ -1381,16 +1385,16 @@
             {% for token in settings_tokens %}
               <tr x-ref="token-{{ token.id }}">
                 <td class="text-center">
-                  <span data-time="{{ token.created | isoformat }}"></span>
+                  <span x-text="'{{ token.created.strftime('%Y-%m-%d %H:%M') }}'" data-time="{{ token.created | isoformat }}"></span>
                 </td>
                 <td>
-                  <span data-time="{{ token.expiration | isoformat }}"></span>
+                  <span x-text="'{{ token.created.strftime('%Y-%m-%d %H:%M') }}'" data-time="{{ token.expiration | isoformat }}"></span>
                 </td>
                 <td class="text-center">
                   <span
                       class="delete-token" role="button"
                       @click="deleteTokenModal({{ token.id }})">
-                      <i class="cursor-pointer fas fa-times"></i>
+                      Delete
                   </span>
                 </td>
               </tr>
