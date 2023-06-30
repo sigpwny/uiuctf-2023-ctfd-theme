@@ -1526,8 +1526,383 @@
             // invite.html is not themed
             
             // public.html
-            async createPublicTeamPane(teamId) {
+            async createPublicTeamPane(PANE_TEAM_ID) {
               // Will need an API call or GET/POSTs to the real page (b/c teamID)
+              const elem = `
+  <div>
+    <div class="container" x-data="TeamGraphsPublic(${PANE_TEAM_ID})">
+      <h1 id="team-id" x-text="team.data.name"></h1>
+
+        <h3 class="d-inline-block mx-1" x-show="team.data.affiliation">
+          <span class="badge bg-primary rounded-pill" x-text="team.data.affiliation"></span>
+        </h3>
+
+        <h3 class="d-inline-block mx-1" x-show="team.data.country">
+					<span class="badge bg-primary rounded-pill">
+						<i :class="\`flag-\${team.data.country.toLowerCase()}\`"></i>
+						<span x-text="team.data.country">
+					</span>
+        </h3>
+
+      <div class="pt-2">
+        <a x-show="team.data.website && team.data.website.startswith('http')" x-bind:href="team.data.website" target="_blank" style="color: inherit;" rel="noopener">
+          <i
+              class="fas fa-external-link-alt fa-2x px-2" data-toggle="tooltip" data-placement="top"
+              x-bind:title="team.data.website"
+          ></i>
+        </a>
+      </div>
+
+      <hr class="w-50 mx-auto" x-show="!!team.data.website">
+
+      <h2 id="team-place" class="text-center">
+        <div x-text="team.data.place"></div>
+        <small x-show="team.data.place">place</small>
+      </h2>
+
+      <h2 id="team-score" class="text-center">
+        <div x-text="team.data.score"></div>
+        <small x-show="team.data.place">points</small>
+      </h2>
+    </div>
+  </div>
+
+  <div class="container">
+    {% include "components/errors.html" %}
+
+    <br>
+
+    <div class="row">
+      <div class="col-md-12">
+        <h3>Members</h3>
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <td><b>User Name</b></td>
+            <td><b>Score</b></td>
+          </tr>
+          </thead>
+          <tbody>
+          <template x-for="member in members.data">
+            <tr>
+              <td>
+                <a x-bind:href="\`/users/\${member.id}\`" x-text="member.name"></a>
+              </td>
+              <td x-text="member.score"></td>
+            </tr>
+          </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+        <div class="row" x-show="awards.data.length > 0">
+          <div class="col-md-12">
+            <h3>Awards</h3>
+          </div>
+
+          <template x-for="award in awards.data">
+            <div class="col-md-3 col-sm-6">
+              <p class="text-center">
+                <i :class="\`award-icon award-\${ award.icon } fa-2x\`"></i> <br>
+                <strong x-text="award.name"></strong>
+              </p>
+
+              <p class="text-center" x-text="award.category"></p>
+
+              <p class="text-center" x-text="award.description"></p>
+
+              <p class="text-center" x-text="award.value"></p>
+            </div>
+          </template>
+        </div>
+
+        <br>
+
+      <div class="row">
+        <div class="col-md-12">
+          <h3>Solves</h3>
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <td class="text-center"><b>Challenge</b></td>
+              <td class="d-none d-md-block d-lg-block"><b>Category</b></td>
+              <td><b>Value</b></td>
+              <td><b>Time</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="solve in solves.data">
+              <tr>
+                <td class="text-center">
+                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id)">
+                  </a>
+                </td>
+                <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
+                <td x-text="solve.challenge.category">{{ solve.challenge.value }}</td>
+                <td class="solve-time">
+                  <span x-bind:data-time="solve.date"></span>
+                </td>
+              </tr>
+            </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-6 d-none d-md-block d-lg-block py-4">
+          <div class="progress">
+            <div 
+              class="progress-bar" 
+              role="progressbar" 
+              :style="{ width: \`\${getSolvePercentage()}%\`, 'background-color': 'rgb(0, 209, 64)' }" 
+            >
+            </div>
+            <div 
+              class="progress-bar" 
+              role="progressbar" 
+              :style="{ width: \`\${getFailPercentage()}%\`, 'background-color': 'rgb(207, 38, 0)' }"
+            >
+            </div>
+          </div>
+          <div class="ps-2 float-start">
+            <svg height="16" width="16">
+              <circle cx="8" cy="8" r="5" fill="rgb(0, 209, 64)" />
+            </svg>
+            <small x-text="\`Solves (\${getSolvePercentage()}%)\`"></small>
+          </div>
+          <div class="ps-2 float-start">
+            <svg height="16" width="16">
+              <circle cx="8" cy="8" r="5" fill="rgb(207, 38, 0)" />
+            </svg>
+            <small x-text="\`Fails (\${getFailPercentage()}%)\`"></small>
+          </div>
+        </div>
+        <div class="col-md-6 d-none d-md-block d-lg-block py-4">
+          <div class="progress">
+            <template x-for="category in getCategoryBreakdown()" :key="category.name">
+              <div 
+                class="progress-bar" 
+                role="progressbar" 
+                :style="{ width: \`\${category.percent}%\`, 'background-color': category.color }"
+              >
+              </div>
+            </template>
+          </div>
+          <template x-for="category in getCategoryBreakdown()" :key="category.name">
+            <div class="ps-2 float-start">
+              <svg height="16" width="16">
+                <circle cx="8" cy="8" r="5" :fill="category.color" />
+              </svg>
+              <small x-text="\`\${category.name} (\${category.percent}%)\`"></small>
+            </div>
+          </template>
+        </div>
+
+        <br class="clearfix">
+
+        <div class="col-md-12 d-none d-md-block d-lg-block">
+          <div id="score-graph" x-ref="scoregraph" class="w-100 d-flex align-items-center">
+            <div class="text-center w-100">
+              <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row min-vh-25" x-show="solves.data.length === 0">
+        <h3 class="opacity-50 text-center w-100 justify-content-center align-self-center">
+          No solves yet
+        </h3>
+      </div>
+  </div>
+  </div>
+`
+              this.createPane({
+                name: "team",
+                title: `Team Info`,
+                taskbar_title: `Team Info`,
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                hide_maximize: true,
+                disable_resize: false,
+                transform: "center",
+                width: "400px",
+                height: "500px",
+              });
+            }
+
+            async createPublicUserPane(PANE_USER_ID) {
+              const elem = `
+              <div x-data="UserGraphsPublic(${PANE_USER_ID})">
+
+<div class="jumbotron">
+  <div class="container">
+    <h1 x-text="user.data.name">New theme??!</h1>
+    <h1 x-text="user.data.name"></h1>
+
+      <h2 x-show="user.data.team_id">
+        <a x-bind:href="\`/teams/\${user.data.team_id}\`">
+          <span class="badge bg-secondary" x-text="team.data.name">
+          </span>
+        </a>
+      </h2>
+
+    <div class="pt-2">
+        <h3 class="d-inline-block mx-1" x-show="user.data.affiliation">
+          <span class="badge rounded-pill bg-primary" x-text="user.data.affiliation"></span>
+        </h3>
+
+        <h3 class="d-inline-block mx-1" x-show="user.data.country">
+          <span class="badge rounded-pill bg-primary">
+              <i class="\`flag-\${user.data.country.toLowerCase()}\`"></i>
+              <span x-text="user.data.country"></span>
+          </span>
+        </h3>
+    </div>
+
+    <div>
+      <h2 class="text-center" x-show="user.data.place">
+        <div x-text="user.data.place">
+          <small>place</small>
+        </h2>
+        <h2 class="text-center" x-show="user.data.score">
+        <div x-text="user.data.score">
+        <small>points</small>
+      </h2>
+    </div>
+
+    <div class="pt-3" x-show="user.data.website">
+        <a x-bind:href="user.data.website" target="_blank" style="color: inherit;" rel="noopener">
+          <i
+              class="fas fa-external-link-alt fa-2x px-2" data-toggle="tooltip" data-placement="top"
+              x-bind:title="user.data.website"
+          ></i>
+        </a>
+    </div>
+  </div>
+</div>
+<div class="container">
+  {% include "components/errors.html" %}
+    <div class="row">
+      <div class="col-md-12">
+        <h3>Solves</h3>
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <td><b>Challenge</b></td>
+            <td class="d-none d-md-block d-lg-block"><b>Category</b></td>
+            <td><b>Value</b></td>
+            <td><b>Time</b></td>
+          </tr>
+          </thead>
+          <tbody>
+            <template x-for="solve in solves.data">
+              <tr>
+                <td class="text-center">
+                  <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id)">
+                  </a>
+                </td>
+                <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
+                <td x-text="solve.challenge.value"></td>
+                <td class="solve-time">
+                  <span x-bind:data-time="solve.date"></span>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+      <div class="col-md-6 d-none d-md-block d-lg-block py-4">
+        <div class="progress">
+          <div 
+            class="progress-bar" 
+            role="progressbar" 
+            :style="{ width: \`\${getSolvePercentage()}%\`, 'background-color': 'rgb(0, 209, 64)' }" 
+          >
+          </div>
+          <div 
+            class="progress-bar" 
+            role="progressbar" 
+            :style="{ width: \`\${getFailPercentage()}%\`, 'background-color': 'rgb(207, 38, 0)' }"
+          >
+          </div>
+        </div>
+        <div class="ps-2 float-start">
+          <svg height="16" width="16">
+            <circle cx="8" cy="8" r="5" fill="rgb(0, 209, 64)" />
+          </svg>
+          <small x-text="\`Solves (\${getSolvePercentage()}%)\`"></small>
+        </div>
+        <div class="ps-2 float-start">
+          <svg height="16" width="16">
+            <circle cx="8" cy="8" r="5" fill="rgb(207, 38, 0)" />
+          </svg>
+          <small x-text="\`Fails (\${getFailPercentage()}%)\`"></small>
+        </div>
+      </div>
+      <div class="col-md-6 d-none d-md-block d-lg-block py-4">
+        <div class="progress">
+          <template x-for="category in getCategoryBreakdown()" :key="category.name">
+            <div 
+              class="progress-bar" 
+              role="progressbar" 
+              :style="{ width: \`\${category.percent}%\`, 'background-color': category.color }"
+            >
+            </div>
+          </template>
+        </div>
+        <template x-for="category in getCategoryBreakdown()" :key="category.name">
+          <div class="ps-2 float-start">
+            <svg height="16" width="16">
+              <circle cx="8" cy="8" r="5" :fill="category.color" />
+            </svg>
+            <small x-text="\`\${category.name} (\${category.percent}%)\`"></small>
+          </div>
+        </template>
+      </div>
+
+      <br class="clearfix">
+
+      <div class="col-md-12 d-none d-md-block d-lg-block py-4">
+        <div id="score-graph" x-ref="scoregraph" class="w-100 d-flex align-items-center">
+          <div class="text-center w-100">
+            <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  <div class="row min-vh-25" x-show="solves.length === 0">
+    <h3 class="opacity-50 text-center w-100 justify-content-center align-self-center">
+      No solves yet
+    </h3>
+  </div>
+</div>
+</div>
+`
+              this.createPane({
+                name: "user",
+                title: `User Info`,
+                taskbar_title: `User Info`,
+                initial_body_elem: elem,
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                hide_maximize: true,
+                disable_resize: false,
+                transform: "center",
+                width: "400px",
+                height: "500px",
+              });
+              // Rebuild please
+              console.log('built again?!')
+              console.log('built again!?!')
+
             }
 
             // teams.html
@@ -1750,6 +2125,7 @@
 
             async triggerLogout() {
               await fetch('/logout')
+              this.closeAllPanes()
               this.createAlertPane({"title": "Logout Success", "type": "success", "content": "You have been logged out."})
               location.reload()
             }
@@ -1869,7 +2245,7 @@
                       Scoreboard
                     </span>
                   </div>
-                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''">
+                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createPublicUserPane(3)">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_user.png" />
                     <span>
                       Users
@@ -1917,7 +2293,7 @@
           </li>
         </ul>
         <div class="d-flex flex-row align-items-center">
-          <div class="mr-1 cursor-pointer font-xsmall d-flex flex-row" @click="desktop.createConfirmClosePane();"><div class="pt-1">Close All</div><img class="pl-1" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png" /></div>
+          <div class="mr-1 cursor-pointer font-xsmall d-flex flex-row" @click="desktop.createConfirmClosePane();"><div class="pt-1">Close All!</div><img class="pl-1" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png" /></div>
           <div id="time" class="time text-center">12:00 AM</div>
         </div>
       </nav>

@@ -1,1 +1,0 @@
-import{u as i,i as t,a as n,b as e,c as r,d as $,e as o,f as d,g as f,h as m,j as u,k as b,l as c,m as p}from"./echarts.128204f2.js";i([t,n,e,r,$,o,d,f,m,u,b,c]);function h(s,l){let a=p(s);a.setOption(l),window.addEventListener("resize",()=>{a&&a.resize()})}export{h as e};

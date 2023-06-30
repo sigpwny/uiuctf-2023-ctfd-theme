@@ -365,10 +365,11 @@ Alpine.data("Tokens", () => ({
 
 /* Profile Page */
 
-Alpine.data("UserGraphs", () => ({
+Alpine.data("PrivateUserGraphs", () => ({
   solves: null,
   fails: null,
   awards: null,
+  user: {},
   solveCount: 0,
   failCount: 0,
   awardCount: 0,
@@ -418,6 +419,10 @@ Alpine.data("UserGraphs", () => ({
     this.solves = await CTFd.pages.users.userSolves("me");
     this.fails = await CTFd.pages.users.userFails("me");
     this.awards = await CTFd.pages.users.userAwards("me");
+    const user = await CTFd.fetch(`/api/v1/users/me`, {
+      method: "GET",
+    });
+    this.user = await user.json();
 
     this.solveCount = this.solves.meta.count;
     this.failCount = this.fails.meta.count;
@@ -559,10 +564,12 @@ Alpine.data("CaptainMenu", () => ({
   },
 }));
 
-Alpine.data("TeamGraphs", () => ({
+const teamComponent = (PANE_TEAM_ID) => ({
   solves: null,
   fails: null,
   awards: null,
+  members: {},
+  team: {},
   solveCount: 0,
   failCount: 0,
   awardCount: 0,
@@ -596,7 +603,7 @@ Alpine.data("TeamGraphs", () => ({
       data.push({
         name: property,
         count: breakdown[property],
-        percent: (breakdown[property] / categories.length) * 100,
+        percent: ((breakdown[property] / categories.length) * 100).toFixed(2),
         color: colorHash(property),
       });
     }
@@ -605,9 +612,19 @@ Alpine.data("TeamGraphs", () => ({
   },
 
   async init() {
-    this.solves = await CTFd.pages.teams.teamSolves("me");
-    this.fails = await CTFd.pages.teams.teamFails("me");
-    this.awards = await CTFd.pages.teams.teamAwards("me");
+    this.solves = await CTFd.pages.teams.teamSolves(PANE_TEAM_ID);
+    this.fails = await CTFd.pages.teams.teamFails(PANE_TEAM_ID);
+    this.awards = await CTFd.pages.teams.teamAwards(PANE_TEAM_ID);
+    
+    const members = await CTFd.fetch(`/api/v1/teams/${PANE_TEAM_ID}/members`, {
+        method: "GET",
+      })
+    this.members = await members.json()
+    
+    const team = await CTFd.fetch(`/api/v1/teams/${PANE_TEAM_ID}`, {
+      method: "GET",
+    })
+    this.team = await team.json()
 
     this.solveCount = this.solves.meta.count;
     this.failCount = this.fails.meta.count;
@@ -616,14 +633,100 @@ Alpine.data("TeamGraphs", () => ({
     embed(
       this.$refs.scoregraph,
       getUserScoreOption(
-        CTFd.team.id,
-        CTFd.team.name,
+        PANE_TEAM_ID,
+        this.team.data.name,
         this.solves.data,
         this.awards.data
       )
     );
   },
-}));
+})
+Alpine.data("TeamGraphsPublic", (PANE_TEAM_ID) => teamComponent(PANE_TEAM_ID));
+
+const userComponent = (PANE_USER_ID) => ({
+  solves: null,
+  fails: null,
+  awards: null,
+  user: null,
+  team: null,
+  solveCount: 0,
+  failCount: 0,
+  awardCount: 0,
+
+  getSolvePercentage() {
+    return ((this.solveCount / (this.solveCount + this.failCount)) * 100).toFixed(2);
+  },
+
+  getFailPercentage() {
+    return ((this.failCount / (this.solveCount + this.failCount)) * 100).toFixed(2);
+  },
+
+  getCategoryBreakdown() {
+    const categories = [];
+    const breakdown = {};
+
+    this.solves.map(solve => {
+      categories.push(solve.challenge.category);
+    });
+
+    categories.forEach(category => {
+      if (category in breakdown) {
+        breakdown[category] += 1;
+      } else {
+        breakdown[category] = 1;
+      }
+    });
+
+    const data = [];
+    for (const property in breakdown) {
+      const percent = Number((breakdown[property] / categories.length) * 100).toFixed(
+        2
+      );
+      data.push({
+        name: property,
+        count: breakdown[property],
+        color: colorHash(property),
+        percent,
+      });
+    }
+
+    return data;
+  },
+
+  async init() {
+    this.solves = await CTFd.pages.users.userSolves(PANE_USER_ID);
+    this.fails = await CTFd.pages.users.userFails(PANE_USER_ID);
+    this.awards = await CTFd.pages.users.userAwards(PANE_USER_ID);
+    const data = await CTFd.fetch(`/api/v1/users/${PANE_USER_ID}`, {
+      method: "GET",
+    })
+    this.user = await data.json()
+
+    this.team = {};
+    if (this.user.data && this.user.data.user_id) {
+      const team = await CTFd.fetch(`/api/v1/teams/${this.user.data.team_id}`, {
+        method: "GET",
+      })
+      this.team = await team.json();
+    }
+
+    this.solveCount = this.solves.meta.count;
+    this.failCount = this.fails.meta.count;
+    this.awardCount = this.awards.meta.count;
+
+    embed(
+      this.$refs.scoregraph,
+      getUserScoreOption(
+        this.user.data.id,
+        this.user.data.name,
+        this.solves.data,
+        this.awards.data
+      )
+    );
+  }
+});
+
+Alpine.data("UserGraphsPublic", (PANE_USER_ID) => userComponent(PANE_USER_ID));
 
 /* Startup Alpine */
 
