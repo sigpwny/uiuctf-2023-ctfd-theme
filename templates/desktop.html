@@ -167,30 +167,36 @@
       overflow-y: auto;
     }
 
-    .pane-control-icon {
+    .pane-control-icon, .btn-close {
       image-rendering: pixelated;
       user-select: none;
     }
-    .pane-control-icon > img {
+    .pane-control-icon > img, .btn-close > img {
       pointer-events: none;
       display: none;
       height: 0.875rem;
     }
-    .pane-control-icon > img:first-child {
+    .pane-control-icon > img:first-child, .btn-close > img:first-child {
       display: block;
     }
-    .pane-control-icon:active > img:first-child {
+    .pane-control-icon:active > img:first-child, .btn-close:active > img:first-child {
       display: none;
     }
-    .pane-control-icon:active > img:last-child {
+    .pane-control-icon:active > img:last-child, .btn-close:active > img:last-child {
       display: block;
     }
-    .close-icon {
+    .close-icon, .btn-close {
       margin-left: 0.125rem;
     }
 
     .user-select-none {
       user-select: none !important;
+    }
+
+    button.btn-close {
+      border-color: transparent !important;
+      border-width: 0px !important;
+      padding: 0px !important;
     }
 
     .info-panel {
@@ -834,8 +840,7 @@
                       </div>
                     </div>
                     <div class="d-flex flex-column pl-4">
-                      <!-- {{ form.submit(class="btn btn-sm btn-primary") }} -->
-                      <button class="btn btn-sm btn-block btn-primary" id="_submit" name="_submit" value="Submit">
+                      <button class="btn btn-sm btn-block btn-primary" name="_submit" value="Submit">
                         <span class="btn-text">OK</span>
                       </button>
                       <button class="btn btn-sm btn-block btn-primary" disabled>
@@ -1060,7 +1065,7 @@
                     <button class="btn btn-sm btn-primary" disabled>
                       <span class="btn-text">< Back</span>
                     </button>
-                    <button class="btn btn-sm btn-primary" id="_submit" name="_submit" value="Submit">
+                    <button class="btn btn-sm btn-primary" name="_submit" value="Submit">
                       <span class="btn-text">Next ></span>
                     </button>
                   </div>
@@ -1087,7 +1092,6 @@
             async createScoreboardPane() {
               const elem = `
               {% include "components/errors.html" %}
-
               <div id="score-graph" class="d-flex align-items-center" x-data="ScoreboardDetail" x-ref="scoregraph">
                 <div class="col-md-12 text-center">
                   <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
@@ -1231,6 +1235,8 @@
               <strong>Success!</strong>
               Your profile has been updated
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
               </button>
             </div>
 
@@ -1243,6 +1249,8 @@
                     type="button" class="btn-close" data-bs-dismiss="alert"
                     aria-label="Close"
                 >
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
                 </button>
               </div>
             </template>
@@ -1267,7 +1275,8 @@
                   <button
                       type="button" class="btn-close" data-bs-dismiss="modal"
                       aria-label="Close"
-                  ></button>
+                  ><img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt=""></button>
                 </div>
 
                 <div class="modal-body">
@@ -1328,7 +1337,8 @@
                   <button
                       type="button" class="btn-close" data-bs-dismiss="modal"
                       aria-label="Close"
-                  >
+                  ><img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
                   </button>
                 </div>
 
@@ -1439,7 +1449,7 @@
               //   class="bg-white w-100 h-100 d-flex flex-column"
               // >
               const elem = `
-                <div x-data="ChallengeBoard" class="d-flex flex-column h-100 w-100">
+                <div x-data="ChallengeBoard" class="d-flex flex-column h-100 w-100" @load-challenges.window="loadChallenges()">
                   <ul class="m-0">
                     <li>File</li>
                   </ul>
@@ -1469,6 +1479,7 @@
                                   class="d-flex flex-column text-center mx-auto"
                                   style="width: 64px;"
                                   onclick="/* TODO: highlight icon/text (and remove when unclicked), on mobile open challenge */"
+                                  @click="desktop.createChallengePane(c.id); event.stopPropagation();"
                                   @dblclick="desktop.createChallengePane(c.id); event.stopPropagation();"
                                 >
                                   <img
@@ -1496,27 +1507,26 @@
                   </div>
                 </div>
               `
-              this.createPane({
-                name: "challenges",
-                title: "Challenges",
-                taskbar_title: "Challenges",
-                initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
-                width: "600px",
-                height: "400px",
-                disable_padding: true,
-              });
+              
               // Display error if /challenges is not accessible
               window.CTFd.fetch("/api/v1/challenges")
                 .then(response => response.json())
                 .then(data => {
                   if (data.success) {
-                    // window.CTFd.pages.challenges = data.data;
-                    // window.dispatchEvent(new CustomEvent("load-challenges"));
+                    this.createPane({
+                      name: "challenges",
+                      title: "Challenges",
+                      taskbar_title: "Challenges",
+                      initial_body_elem: elem,
+                      icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
+                      width: "600px",
+                      height: "400px",
+                      disable_padding: true,
+                    });
                   } else {
                     this.createAlertPane({
                       title: "403 Error",
-                      content: `/challenges is not accessible.<br/><br/>Access is denied.`,
+                      content: `/challenges is not accessible.<br/><br/>Access is denied.<br/><br/>You may need to <a href="#" @click="desktop.createLoginPane(); event.stopPropagation();">log in</a>, or <a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">be on a team</a>.`,
                     });
                   }
                 })
@@ -1957,6 +1967,7 @@
               const error = (matches && matches.length > 1) ? matches[1] : null
               if (error === null) {
                 this.closePanes('team_join')
+                this.closePanes('team')
                 if (statusCode === 403) {
                   this.createAlertPane({"title": "Team Join Error","content": "Team Join form expired. Please try again."});
                 } else {
@@ -2023,6 +2034,7 @@
               const error = (matches && matches.length > 1) ? matches[1] : null
               if (error === null) {
                 this.closePanes('team_create')
+                this.closePanes('team')
                 if (statusCode === 403) {
                   this.createAlertPane({"title": "Team Create Error","content": "Team Create form expired. Please try again."});
                 } else {
@@ -2086,6 +2098,10 @@
               // This pane should either show your team, or buttons to the join/create team panes
               const elem = `
                   {% if privateteam_enrollment_needed %}
+                      <p>
+                        Looks like you are not on a team yet. Please join or create a team.  
+                      </p>
+
                       <div class="row">
                 <div class="mt-3 col-sm-4 col-md-3 offset-sm-2 offset-md-3 text-center">
                   <a class="btn btn-primary w-100" href="#" @click="desktop.createPrivateTeamJoinPane(); event.stopPropagation();">Join Team</a>
@@ -2330,7 +2346,7 @@
                 disable_resize: false,
                 transform: "center",
                 width: "600px",
-                height: "400px",
+                height: "200px",
               });
             }
 
@@ -2713,10 +2729,7 @@
           />
         </div>
         <div class="d-flex flex-row justify-content-between mt-1">
-          <div>
-            <template x-if="response">
-              <p class="mb-0" x-text="response.data.message"></p>
-            </template>
+          <div @render-status-popup.window="desktop.createAlertPane({'title': 'Challenge Submit', 'type': response.data.status === 'correct'? 'success': 'error', 'content': response.data.message})">
           </div>
           <button
             id="${elem_id}_challenge-submit"
@@ -2853,6 +2866,8 @@
           <div class="modal-header">
             <h2 class="modal-action text-center w-100">Edit Team</h2>
             <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
             </button>
           </div>
   
@@ -2921,6 +2936,8 @@
                     <strong>Success!</strong>
                     Your team's profile has been updated
                     <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
                     </button>
                   </div>
   
@@ -2930,6 +2947,8 @@
                       <span x-text="msg"></span>
   
                       <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                        <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
                       </button>
                     </div>
                   </template>
@@ -2949,6 +2968,8 @@
           <div class="modal-header">
             <h2 class="modal-action text-center w-100">Choose Captain</h2>
             <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
             </button>
           </div>
           <div class="modal-body clearfix">
@@ -2972,6 +2993,8 @@
                     <strong>Success!</strong>
                     Your captain rights have been transferred
                     <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
                     </button>
                   </div>
                   <template x-for="(msg, idx) in errors" :key="idx">
@@ -2979,6 +3002,8 @@
                       <span class="sr-only">Error:</span>
                       <span x-text="msg"></span>
                       <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                        <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
                       </button>
                     </div>
                   </template>
@@ -2997,6 +3022,8 @@
           <div class="modal-header">
             <h2 class="modal-action text-center w-100">Invite Users</h2>
             <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
             </button>
           </div>
           <div class="modal-body clearfix">
@@ -3033,6 +3060,8 @@
           <div class="modal-header">
             <h2 class="modal-action text-center w-100">Disband Team</h2>
             <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close.png" alt="">
+                <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win95-pane-control/close_pressed.png" alt="">
             </button>
           </div>
           <div class="modal-body">

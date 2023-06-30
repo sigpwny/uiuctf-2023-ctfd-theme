@@ -156,12 +156,13 @@ Alpine.data("Challenge", () => ({
   },
 
   async renderSubmissionResponse() {
-    if (this.response.data.status === "correct") {
+    if (this.response && this.response.data.status === "correct") {
       this.submission = "";
     }
 
     // Dispatch load-challenges event to call loadChallenges in the ChallengeBoard
     this.$dispatch("load-challenges");
+    this.$dispatch("render-status-popup");
   },
 }));
 
