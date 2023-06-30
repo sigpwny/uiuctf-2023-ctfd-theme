@@ -37,6 +37,7 @@
       -o-user-drag: none;
       user-drag: none;
       image-rendering: pixelated;
+      pointer-events: none;
     }
 
     .taskbar {
@@ -262,6 +263,7 @@
               this.hide_close = params.hide_close ?? false;
               this.disable_drag = params.disable_drag ?? false;
               this.disable_resize = params.disable_resize ?? false;
+              this.disable_padding = params.disable_padding ?? false;
               this.#createPaneDOM();
 
               // Dynamic attributes
@@ -364,6 +366,7 @@
               // Create pane body
               const pane_body = document.createElement("div");
               pane_body.setAttribute("class", "card-body");
+              if (this.disable_padding) pane_body.classList.add("p-0");
               pane_body.insertAdjacentHTML("beforeend", this.initial_body_elem);
               pane_elem.appendChild(pane_body);
 
@@ -507,6 +510,7 @@
                 hide_close: this.hide_close,
                 disable_drag: this.disable_drag,
                 disable_resize: this.disable_resize,
+                disable_padding: this.disable_padding,
                 transform: this.transform,
                 z: this.z,
                 width: this.width,
@@ -739,7 +743,7 @@
                 </div>
                 <div class="d-flex flex-row justify-content-center">
                   <button class="btn btn-sm btn-primary" x-ref="close">
-                    <span>OK</span>
+                    <span class="btn-text">OK</span>
                   </button>
                 </div>
               `;
@@ -794,10 +798,10 @@
                     <div class="d-flex flex-column pl-4">
                       <!-- {{ form.submit(class="btn btn-sm btn-primary") }} -->
                       <button class="btn btn-sm btn-block btn-primary" id="_submit" name="_submit" value="Submit">
-                        <span>OK</span>
+                        <span class="btn-text">OK</span>
                       </button>
                       <button class="btn btn-sm btn-block btn-primary" disabled>
-                        <span>Cancel</span>
+                        <span class="btn-text">Cancel</span>
                       </button>
                     </div>
                   </div>
@@ -944,8 +948,8 @@
                                 </div></div>`
               this.createPane({
                 name: "info",
-                title: "Info for UIUCTF 2023",
-                taskbar_title: "Info",
+                title: "Information",
+                taskbar_title: "Information",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/help_book_big-1.png",
                 hide_minimize: false,
@@ -963,80 +967,69 @@
               {% with form = Forms.auth.RegistrationForm() %}
 
                 {% from "macros/forms.html" import render_extra_fields %}
-
-                <form method="post" accept-charset="utf-8" autocomplete="off" role="form" @submit.prevent="desktop.doRegisterForm($event)">
-
-                  <div class="row">
-                    <div class="col-4">
-                      <img class="img-fluid sidebar-img" src="/themes/uiuctf-2023-ctfd-theme/static/img/register-sidebar.jpg">
-                    </div>
-                    <div class="col-8 pt-2">
-                      <p> Enter the basic information for the new user. </p>
-
-                      <div class="row px-2 my-1">
-                        <div class="col-3">
-                          <b>{{ form.name.label(class="form-label") }}</b>
+                <form class="d-flex flex-column h-100 w-100 user-select-none" method="post" accept-charset="utf-8" autocomplete="off" role="form" @submit.prevent="desktop.doRegisterForm($event)">
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="d-flex flex-row h-100">
+                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/register-sidebar.jpg">
+                      <div class="d-flex flex-column flex-grow-1 px-3 py-2">
+                        <p>Enter the basic information for the new user.</p>
+                        <div class="row my-1">
+                          <div class="col-3">
+                            <span>{{ form.name.label(class="form-label") }}</span>
+                          </div>
+                          <div class="col d-flex flex-column">
+                            {{ form.name(class="form-control", value=name) }}
+                            <small class="font-xsmall text-muted">
+                              Your username on the site
+                            </small>
+                          </div>
                         </div>
-                        <div class="col d-flex flex-column">
-                          {{ form.name(class="form-control", value=name) }}
-                          <small class="font-xsmall text-muted">
-                            Your username on the site
-                          </small>
+                        <div class="row my-1">
+                          <div class="col-3">
+                            <span>{{ form.email.label(class="form-label") }}</span>
+                          </div>
+                          <div class="col d-flex flex-column">
+                            {{ form.email(class="form-control", value=email) }}
+                            <small class="font-xsmall text-muted">
+                              Never shown to the public
+                            </small>
+                          </div>
+                        </div>
+                        <div class="row my-1">
+                          <div class="col-3">
+                            <span>{{ form.password.label(class="form-label") }}</span>
+                          </div>
+                          <div class="col d-flex flex-column">
+                            {{ form.password(class="form-control", value=password) }}
+                            <small class="font-xsmall text-muted">
+                              Password used to log into your account
+                            </small>
+                          </div>
+                        </div>
+                        {{ render_extra_fields(form.extra) }}
+                        {% if Configs.tos_or_privacy %}
+                          <p>
+                            By registering, you agree to the
+                            <a href="{{ Configs.privacy_link }}" rel="noopener" target="_blank">privacy policy</a>
+                            and <a href="{{ Configs.tos_link }}" rel="noopener" target="_blank">terms of service</a>
+                          </p>
+                        {% endif %}
+                        <div class="row pt-4">
+                          <p>To continue, click Next.</p>
                         </div>
                       </div>
-                      <div class="row px-2 my-1">
-                        <div class="col-3">
-                          <b>{{ form.email.label(class="form-label") }}</b>
-                        </div>
-                        <div class="col d-flex flex-column">
-                          {{ form.email(class="form-control", value=email) }}
-                          <small class="font-xsmall text-muted">
-                            Never shown to the public
-                          </small>
-                        </div>
-                      </div>
-                      <div class="row px-2 my-1">
-                        <div class="col-3">
-                          <b>{{ form.password.label(class="form-label") }}</b>
-                        </div>
-                        <div class="col d-flex flex-column">
-                          {{ form.password(class="form-control", value=password) }}
-                          <small class="font-xsmall text-muted">
-                            Password used to log into your account
-                          </small>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <p><br><br>To continue, click Next.</p>
-                      </div>
-                      {{ form.nonce() }}
-
-                      {{ render_extra_fields(form.extra) }}
                     </div>
                   </div>
                   <hr class="py-0 my-0">
-                  <div class="row my-3 px-2">
-                    <div class="d-flex flex-row justify-content-end">
-                      <button class="btn btn-md btn-primary" disabled>
-                        <span>< Back</span>
-                      </button>
-                      <button class="btn btn-md btn-primary" id="_submit" name="_submit" value="Submit">
-                        <span>Next ></span>
-                      </button>
-                    </div>
+                  <div class="d-flex flex-row justify-content-end py-2 px-2">
+                    <button class="btn btn-sm btn-primary" disabled>
+                      <span class="btn-text">< Back</span>
+                    </button>
+                    <button class="btn btn-sm btn-primary" id="_submit" name="_submit" value="Submit">
+                      <span class="btn-text">Next ></span>
+                    </button>
                   </div>
-
-                  {% if Configs.tos_or_privacy %}
-                    <div class="row py-2">
-                      <div class="col-md-12 text-center">
-                        <small class="text-muted text-center">
-                          By registering, you agree to the
-                          <a href="{{ Configs.privacy_link }}" rel="noopener" target="_blank">privacy policy</a>
-                          and <a href="{{ Configs.tos_link }}" rel="noopener" target="_blank">terms of service</a>
-                        </small>
-                      </div>
-                    </div>
-                  {% endif %}
+                  {{ form.nonce() }}
                 </form>
               {% endwith %}
               `;
@@ -1047,7 +1040,10 @@
                 taskbar_title: "Register",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msagent-1.png",
-                hide_close: false,
+                hide_minimize: true,
+                hide_maximize: true,
+                disable_resize: true,
+                disable_padding: true,
                 width: "600px",
                 height: "450px",
                 transform: "center",
@@ -1258,7 +1254,7 @@
 
                 <div class="modal-footer">
                   <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                    Got it!
+                    <span class="btn-text">Got it!</span>
                   </button>
                 </div>
               </div>
@@ -1307,12 +1303,13 @@
 
                 <div class="modal-footer">
                   <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-                    No
+                    <span class="btn-text">No</span>
                   </button>
                   <button
                       type="button" class="btn btn-primary" data-bs-dismiss="modal"
                       @click="deleteSelectedToken()"
-                  >Yes
+                  >
+                    <span class="btn-text">Yes</span>
                   </button>
                 </div>
               </div>
@@ -1380,25 +1377,28 @@
                 name: "close",
                 title: "Confirm Close All",
                 taskbar_title: "Close",
-                initial_body_elem: `<div class="d-flex flex-row user-select-none">
-                  <div class="m-2">
-                    <img class="flex-shrink-0" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png">
+                initial_body_elem: `
+                  <div class="d-flex flex-row user-select-none">
+                    <div class="m-2">
+                      <img class="flex-shrink-0" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png">
+                    </div>
+                    <div class="m-2">
+                      <p>
+                        Are you sure you want to close all panes?
+                      </p>
+                    </div>
                   </div>
-                  <div class="m-2">
-                    <p>
-                      Are you sure you want to close all panes?
-                    </p>
+                  <div class="d-flex flex-row justify-content-center">
+                    <button class="btn btn-sm btn-primary" @click="desktop.closeAllPanes()">
+                      <span class="btn-text">OK</span>
+                    </button>
                   </div>
-                </div>
-                <div class="d-flex flex-row justify-content-center">
-                  <button class="btn btn-sm btn-primary" @click="desktop.closeAllPanes()">
-                    <span>OK</span>
-                  </button>
-                </div>`,
+                `,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png",
+                hide_minimize: true,
+                hide_maximize: true,
+                disable_resize: true,
                 hide_close: false,
-                width: "400px",
-                height: "200px",
                 transform: "center",
               });
             }
@@ -2599,7 +2599,7 @@
                 <div class="d-flex flex-row justify-content-between align-items-center">
                   <p class="mb-1">Hint ${idx}: Unlock for ${h.cost} points</p>
                   <button class="btn btn-sm btn-primary" @click="unlockHint(${h.id})">
-                    Unlock
+                    <span class="btn-text">Unlock</span>
                   </button>
                 </div>
               `;
@@ -2620,7 +2620,7 @@
                 <p class="mb-1">${filename}</p>
                 <a href="${filepath}" target="_blank" rel="noopener">
                   <button class="btn btn-sm btn-primary">
-                    Download
+                    <span class="btn-text">Download</span>
                   </button>
                 </a>
               </div>
@@ -2689,7 +2689,7 @@
             @click.debounce.500ms="submitChallenge()"
             ${c.solved_by_me ? "disabled" : ""}
           >
-            Submit
+            <span class="btn-text">Submit</span>
           </button>
         </div>
       </div>
@@ -3058,7 +3058,7 @@
                   <div style="border-bottom: 1px solid #808080"  @click="desktop.createInfoPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/help_book_big-1.png" />
                     <span>
-                      Info
+                      Information
                     </span>
                   </div>
                   <div x-show="$store.globals.user !== null"  style="border-top: 1px solid #ffffff" @click="desktop.createSettingsPane()"">
@@ -3091,7 +3091,10 @@
           </li>
         </ul>
         <div class="d-flex flex-row align-items-center">
-          <div class="mr-1 cursor-pointer font-xsmall d-flex flex-row" @click="desktop.createConfirmClosePane();"><div class="pt-1">Close All!</div><img class="pl-1" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png" /></div>
+          <div class="mr-1 cursor-pointer font-xsmall d-flex flex-row align-items-center" @click="desktop.createConfirmClosePane();">
+            <div>Close All</div>
+            <img class="pl-1" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png" />
+          </div>
           <div id="time" class="time text-center">12:00 AM</div>
         </div>
       </nav>
