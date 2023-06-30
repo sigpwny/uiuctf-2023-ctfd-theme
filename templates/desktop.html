@@ -1912,12 +1912,67 @@
 
             // join_team.html
             async createPrivateTeamJoinPane() {
+              const elem = `
+              <div>
 
+              {% include "components/errors.html" %}
+
+              {% with form = Forms.teams.TeamJoinForm() %}
+                <form method="POST">
+                  <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control") }}
+                  </div>
+
+                  <div class="mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control") }}
+                  </div>
+
+                  <div class="row pt-3">
+                    <div class="col-md-12">
+                      {{ form.submit(class="btn btn-success float-end px-4") }}
+                    </div>
+                  </div>
+                  {{ form.nonce() }}
+                </form>
+              {% endwith %}
+              </div>
+              `
             }
 
             // new_team.html
             async createPrivateTeamCreatePane() {
+              const elem = `
+              <div>
+                {% include "components/errors.html" %}
 
+                {% with form = Forms.teams.TeamRegisterForm() %}
+                  {% from "macros/forms.html" import render_extra_fields %}
+                  <form method="POST">
+                    <div class="mb-3">
+                      <b>{{ form.name.label(class="form-label") }}</b>
+                      {{ form.name(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                      <b>{{ form.password.label(class="form-label") }}</b>
+                      {{ form.password(class="form-control") }}
+                    </div>
+
+                    {{ render_extra_fields(form.extra) }}
+
+                    <div class="row ">
+                      <div class="col-md-12">
+                        <p>After creating your team, share the team name and password with your teammates so they can join your
+                          team.</p>
+                        {{ form.submit(class="btn btn-success float-end px-4") }}
+                      </div>
+                    </div>
+                    {{ form.nonce() }}
+                  </form>
+                {% endwith %}
+              </div>
+              `
             }
 
             // private.html + teams_enrollment.html
@@ -2189,7 +2244,7 @@
         
         {% if user.team_id %}
         <h2>
-          <a href="{{ url_for('teams.public', team_id=user.team_id) }}">
+          <a href="#" @click="desktop.createPrivateTeamPane({{ user.team_id }})">
             <span class="badge bg-secondary">
               {{ user.team.name }}
 						</span>
@@ -2522,7 +2577,7 @@
           <template x-for="solve in solves">
             <tr>
               <td>
-                <p class="mb-0"><a :href="solve.account_url" x-text="solve.name"></a></p>
+                <p class="mb-0"><a @click="desktop.createPublicTeamPane(solve.account_id)" href="#" x-text="solve.name"></a></p>
               </td>
               <td>
                 <p class="mb-0" x-text="solve.date"></p>
