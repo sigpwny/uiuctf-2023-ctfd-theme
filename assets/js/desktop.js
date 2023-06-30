@@ -631,7 +631,7 @@ Alpine.data("TeamGraphs", () => ({
 }));
 
 /* Team Graph Public */
-const teamComponent = (PANE_TEAM_ID) => ({
+const teamComponent = PANE_TEAM_ID => ({
   solves: null,
   fails: null,
   awards: null,
@@ -682,16 +682,16 @@ const teamComponent = (PANE_TEAM_ID) => ({
     this.solves = await CTFd.pages.teams.teamSolves(PANE_TEAM_ID);
     this.fails = await CTFd.pages.teams.teamFails(PANE_TEAM_ID);
     this.awards = await CTFd.pages.teams.teamAwards(PANE_TEAM_ID);
-    
+
     const members = await CTFd.fetch(`/api/v1/teams/${PANE_TEAM_ID}/members`, {
-        method: "GET",
-      })
-    this.members = await members.json()
-    
+      method: "GET",
+    });
+    this.members = await members.json();
+
     const team = await CTFd.fetch(`/api/v1/teams/${PANE_TEAM_ID}`, {
       method: "GET",
-    })
-    this.team = await team.json()
+    });
+    this.team = await team.json();
 
     this.solveCount = this.solves.meta.count;
     this.failCount = this.fails.meta.count;
@@ -707,10 +707,10 @@ const teamComponent = (PANE_TEAM_ID) => ({
       )
     );
   },
-})
-Alpine.data("TeamGraphsPublic", (PANE_TEAM_ID) => teamComponent(PANE_TEAM_ID));
+});
+Alpine.data("TeamGraphsPublic", PANE_TEAM_ID => teamComponent(PANE_TEAM_ID));
 
-const userComponent = (PANE_USER_ID) => ({
+const userComponent = PANE_USER_ID => ({
   solves: null,
   fails: null,
   awards: null,
@@ -766,14 +766,14 @@ const userComponent = (PANE_USER_ID) => ({
     this.awards = await CTFd.pages.users.userAwards(PANE_USER_ID);
     const data = await CTFd.fetch(`/api/v1/users/${PANE_USER_ID}`, {
       method: "GET",
-    })
-    this.user = await data.json()
+    });
+    this.user = await data.json();
 
     this.team = {};
     if (this.user.data && this.user.data.user_id) {
       const team = await CTFd.fetch(`/api/v1/teams/${this.user.data.team_id}`, {
         method: "GET",
-      })
+      });
       this.team = await team.json();
     }
 
@@ -790,10 +790,10 @@ const userComponent = (PANE_USER_ID) => ({
         this.awards.data
       )
     );
-  }
+  },
 });
 
-Alpine.data("UserGraphsPublic", (PANE_USER_ID) => userComponent(PANE_USER_ID));
+Alpine.data("UserGraphsPublic", PANE_USER_ID => userComponent(PANE_USER_ID));
 
 /* Startup Alpine */
 
