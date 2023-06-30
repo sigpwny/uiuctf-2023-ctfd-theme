@@ -189,7 +189,7 @@ Alpine.data("ChallengeBoard", () => ({
   getCategories() {
     const categories = [];
 
-    (this.challenges||[]).forEach(challenge => {
+    (this.challenges || []).forEach(challenge => {
       const { category } = challenge;
 
       if (!categories.includes(category)) {
