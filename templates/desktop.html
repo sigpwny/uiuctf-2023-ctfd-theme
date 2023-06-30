@@ -1439,54 +1439,60 @@
               //   class="bg-white w-100 h-100 d-flex flex-column"
               // >
               const elem = `
-                <div
-                  x-data="ChallengeBoard"
-                  class="bg-white w-100 h-100 d-flex flex-column"
-                >
-                  <div x-show="!loaded">
-                    <div class="min-vh-50 d-flex align-items-center">
-                      <div class="text-center w-100">
-                        <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
-                        <span class="sr-only">Loading...</span>
+                <div x-data="ChallengeBoard" class="d-flex flex-column h-100 w-100">
+                  <ul class="m-0">
+                    <li>File</li>
+                  </ul>
+                  <div
+                    class="d-flex flex-grow-1 mx-2 mb-2 overflow-hidden w95-input-border"
+                  >
+                    <div class="d-flex flex-column flex-grow-1 px-3 py-2 bg-white overflow-auto">
+                      <div x-show="!loaded">
+                        <div class="min-vh-50 d-flex align-items-center">
+                          <div class="text-center w-100">
+                            <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div x-show="loaded">
+                        <template x-for="(category, idx) in getCategories()" :key="idx">
+                          <div class="mb-2">
+                            <div class="category-header">
+                              <p x-text="category" class="h5 m-0"></p>
+                            </div>
+                            <hr class="mt-0" />
+                            <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(64px, 128px));">
+                              <template x-for="(c, idx) in getChallenges(category)" :key="c.id">
+                                <div
+                                  class="d-flex flex-column text-center mx-auto"
+                                  style="width: 64px;"
+                                  onclick="/* TODO: highlight icon/text (and remove when unclicked), on mobile open challenge */"
+                                  @dblclick="desktop.createChallengePane(c.id); event.stopPropagation();"
+                                >
+                                  <img
+                                    :value="c.id"
+                                    x-show="!c.solved_by_me"
+                                    src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png"
+                                  >
+                                  <img
+                                    :value="c.id"
+                                    x-show="c.solved_by_me"
+                                    src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/check-0.png"
+                                  >
+                                  <div>
+                                    <p x-text="c.name"></p>
+                                    <span x-text="c.value"></span>
+                                  </div>
+                                </div>
+                              </template>
+                            </div>
+
+                          </div>
+                        </template>
                       </div>
                     </div>
-                  </div>
-
-                  <div x-show="loaded">
-                    <template x-for="(category, idx) in getCategories()" :key="idx">
-                      <div class="pt-2">
-                        <div class="category-header mb-3">
-                          <p x-text="category"></p>
-                        </div>
-                        <hr />
-                        <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(64px, 128px));">
-                          <template x-for="(c, idx) in getChallenges(category)" :key="c.id">
-                            <div
-                              class="d-flex flex-column text-center mx-auto"
-                              style="width: 64px;"
-                              onclick="/* TODO: highlight icon/text (and remove when unclicked), on mobile open challenge */"
-                              @dblclick="desktop.createChallengePane(c.id); event.stopPropagation();"
-                            >
-                              <img
-                                :value="c.id"
-                                x-show="!c.solved_by_me"
-                                src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png"
-                              >
-                              <img
-                                :value="c.id"
-                                x-show="c.solved_by_me"
-                                src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/check-0.png"
-                              >
-                              <div>
-                                <p x-text="c.name"></p>
-                                <span x-text="c.value"></span>
-                              </div>
-                            </div>
-                          </template>
-                        </div>
-
-                      </div>
-                    </template>
                   </div>
                 </div>
               `
@@ -1498,6 +1504,7 @@
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
                 width: "600px",
                 height: "400px",
+                disable_padding: true,
               });
               // Display error if /challenges is not accessible
               window.CTFd.fetch("/api/v1/challenges")
