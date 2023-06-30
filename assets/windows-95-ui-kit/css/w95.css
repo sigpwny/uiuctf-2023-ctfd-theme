@@ -3956,9 +3956,7 @@ input[type="text"]:disabled {
   border: 2px solid #ffffff;
   padding: 1rem;
   margin-top: 1rem;
-  box-shadow:
-    #808080 -1px -1px 0px 1px,
-    #808080 -1px -1px 0px 1px inset;
+  box-shadow: #808080 -1px -1px 0px 1px, #808080 -1px -1px 0px 1px inset;
 }
 
 .w95-section-legend {
