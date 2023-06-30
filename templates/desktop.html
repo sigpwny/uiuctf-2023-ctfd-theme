@@ -1018,7 +1018,9 @@
                             <span>{{ form.name.label(class="form-label") }}</span>
                           </div>
                           <div class="col d-flex flex-column">
-                            {{ form.name(class="form-control", value=name) }}
+                            <div class="w95-input-border">
+                              {{ form.name(class="form-control", value=name) }}
+                            </div>
                             <small class="font-xsmall text-muted">
                               Your username on the site
                             </small>
@@ -1029,7 +1031,9 @@
                             <span>{{ form.email.label(class="form-label") }}</span>
                           </div>
                           <div class="col d-flex flex-column">
-                            {{ form.email(class="form-control", value=email) }}
+                            <div class="w95-input-border">
+                              {{ form.email(class="form-control", value=email) }}
+                            </div>
                             <small class="font-xsmall text-muted">
                               Never shown to the public
                             </small>
@@ -1040,7 +1044,9 @@
                             <span>{{ form.password.label(class="form-label") }}</span>
                           </div>
                           <div class="col d-flex flex-column">
-                            {{ form.password(class="form-control", value=password) }}
+                            <div class="w95-input-border">
+                              {{ form.password(class="form-control", value=password) }}
+                            </div>
                             <small class="font-xsmall text-muted">
                               Password used to log into your account
                             </small>
@@ -1054,9 +1060,7 @@
                             and <a href="{{ Configs.tos_link }}" rel="noopener" target="_blank">terms of service</a>
                           </p>
                         {% endif %}
-                        <div class="row pt-4">
-                          <p>To continue, click Next.</p>
-                        </div>
+                        <p class="pt-4">To continue, click Next.</p>
                       </div>
                     </div>
                   </div>
