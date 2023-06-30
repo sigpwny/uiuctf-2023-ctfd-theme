@@ -170,9 +170,25 @@ Alpine.data("ChallengeBoard", () => ({
   loaded: false,
   challenges: [],
   challenge: null,
+  challenge_icons: {},
 
   async init() {
     this.challenges = await CTFd.pages.challenges.getChallenges();
+    this.challenge_icons = await CTFd.fetch("/themes/uiuctf-2023-ctfd-theme/static/custom/icon_map.json")
+      .then(
+        response => response.json()
+      )
+      .then(
+        json => json.icons
+      ).then(
+        icons => {
+          let icon_map = {};
+          icons.forEach(icon => {
+            icon_map[icon.id] = icon.icon_path;
+          });
+          return icon_map;
+        }
+      )
     this.loaded = true;
 
     if (window.location.hash) {
@@ -230,6 +246,11 @@ Alpine.data("ChallengeBoard", () => ({
       console.log("Error running challenge_order function");
       console.log(error);
     }
+
+    challenges = challenges.map(challenge => {
+      challenge.icon_path = this.challenge_icons[challenge.id] ?? '/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png';
+      return challenge;
+    });
 
     return challenges;
   },

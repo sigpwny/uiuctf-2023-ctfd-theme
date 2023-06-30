@@ -1,7 +1,7 @@
 <div>
   {% for info in infos %}
     <div class="alert alert-info alert-dismissible text-center" role="alert">
-      <span>{{ info|replace('<a href="/team">', '<a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">') }}</span>
+      <span>{{ info }}</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true"></span>
       </button>
@@ -10,7 +10,7 @@
 
   {% for info in settings_infos %}
     <div class="alert alert-info alert-dismissible text-center" role="alert">
-      <span>{{ info|replace('<a href="/team">', '<a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">') }}</span>
+      <span>{{ info }}</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true"></span>
       </button>
@@ -19,7 +19,7 @@
 
   {% for info in scoreboard_infos %}
     <div class="alert alert-info alert-dismissible text-center" role="alert">
-      <span>{{ info|replace('<a href="/team">', '<a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">') }}</span>
+      <span>{{ info }}</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true"></span>
       </button>
@@ -28,7 +28,7 @@
 
   {% for error in errors %}
     <div class="alert alert-danger alert-dismissible text-center" role="alert">
-      <span>{{ error|replace('<a href="/team">', '<a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">') }}</span>
+      <span>{{ error }}</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true"></span>
       </button>
@@ -37,7 +37,7 @@
 
   {% for error in settings_errors %}
     <div class="alert alert-danger alert-dismissible text-center" role="alert">
-      <span>{{ error|replace('<a href="/team">', '<a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">') }}</span>
+      <span>{{ error }}</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true"></span>
       </button>
@@ -46,7 +46,7 @@
 
   {% for error in scoreboard_errors %}
     <div class="alert alert-danger alert-dismissible text-center" role="alert">
-      <span>{{ error|replace('<a href="/team">', '<a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">') }}</span>
+      <span>{{ error }}</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true"></span>
       </button>
