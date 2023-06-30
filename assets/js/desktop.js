@@ -637,9 +637,9 @@ Alpine.data("TeamGraphs", () => ({
 
 /* Team Graph Public */
 const teamComponent = PANE_TEAM_ID => ({
-  solves: null,
-  fails: null,
-  awards: null,
+  solves: {},
+  fails: {},
+  awards: {},
   members: {},
   team: {},
   solveCount: 0,
