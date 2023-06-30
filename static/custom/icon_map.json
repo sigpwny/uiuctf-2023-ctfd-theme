@@ -1,34 +1,125 @@
 {
   "icons": [
-    { "id": 1, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_dpf-1.png" },
-    { "id": 2, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_ocx-1.png" },
-    { "id": 3, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/network_cool_two_pcs-5.png" },
-    { "id": 4, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/network_cool_two_pcs-2.png" },
-    { "id": 5, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msg_warning-0.png" },
-    { "id": 6, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-4.png" },
-    { "id": 7, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_empty-4.png" },
-    { "id": 8, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/internet_options-0.png" },
-    { "id": 9, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/appwizard-4.png" },
-    { "id": 10, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/entire_network_globe-0.png" },
-    { "id": 11, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_explorer-0.png" },
-    { "id": 12, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/search_web-0.png" },
-    { "id": 13, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/mouse_padlock.png" },
-    { "id": 14, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/game_mine_2-1.png" },
-    { "id": 15, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/regedit_binary-0.png" },
-    { "id": 16, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_win_alt-2.png" },
-    { "id": 18, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/world-0.png" },
-    { "id": 19, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_padlock-0.png" },
-    { "id": 20, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-4.png" },
-    { "id": 21, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/outlook_express-4.png" },
-    { "id": 22, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_dpf-1.png" },
-    { "id": 23, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/regedit_binary_lock-1.png" },
-    { "id": 24, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/user_world-1.png" },
-    { "id": 25, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/cd_drive_purple-0.png" },
-    { "id": 26, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/calculator-0.png" },
-    { "id": 27, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_net_web-4.png" },
+    {
+      "id": 1,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/calculator-0.png"
+    },
+    {
+      "id": 31,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/outlook_express-0.png"
+    },
+    {
+      "id": 22,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_dpf-1.png"
+    },
+    {
+      "id": 14,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/game_mine_2-1.png"
+    },
+    {
+      "id": 15,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/regedit_binary-0.png"
+    },
+    {
+      "id": 23,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/regedit_binary_lock-1.png"
+    },
+    {
+      "id": 16,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_win_alt-2.png"
+    },
+    {
+      "id": 3,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/network_cool_two_pcs-5.png"
+    },
+    {
+      "id": 4,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/network_cool_two_pcs-2.png"
+    },
+    {
+      "id": 10,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/entire_network_globe-0.png"
+    },
+    {
+      "id": 26,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/calculator-0.png"
+    },
+    {
+      "id": 13,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/mouse_padlock.png"
+    },
+    {
+      "id": 19,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/doctor_watson.png"
+    },
+    {
+      "id": 18,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/world-0.png"
+    },
+    {
+      "id": 21,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/outlook_express-4.png"
+    },
+    {
+      "id": 20,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-4.png"
+    },
+    {
+      "id": 30,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/html2-5.png"
+    },
+    {
+      "id": 27,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_net_web-4.png"
+    },
     { "id": 28, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/zip.png" },
-    { "id": 29, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msagent-3.png" },
-    { "id": 30, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/html2-5.png" },
-    { "id": 31, "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/outlook_express-0.png" }
+    {
+      "id": 29,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msagent-3.png"
+    },
+    {
+      "id": 6,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-4.png"
+    },
+    {
+      "id": 7,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_empty-4.png"
+    },
+    {
+      "id": 8,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/internet_options-0.png"
+    },
+    {
+      "id": 11,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_explorer-0.png"
+    },
+    {
+      "id": 12,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/search_web-0.png"
+    },
+    {
+      "id": 9,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/appwizard-4.png"
+    },
+    {
+      "id": 1,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_dpf-1.png"
+    },
+    {
+      "id": 2,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_ocx-1.png"
+    },
+    {
+      "id": 5,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msg_warning-0.png"
+    },
+    {
+      "id": 25,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/cd_drive_purple-0.png"
+    },
+    {
+      "id": 24,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/user_world-1.png"
+    }
   ]
 }
