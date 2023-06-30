@@ -1123,55 +1123,56 @@
               const elem = `
               {% include "components/errors.html" %}
               <div id="score-graph" class="d-flex align-items-center" x-data="ScoreboardDetail" x-ref="scoregraph">
-                <div class="col-md-12 text-center">
+                <div class="d-flex flex-column text-center">
                   <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+                  <p>Test</p>
                 </div>
               </div>
 
               {% cache 60, CacheKeys.PUBLIC_SCOREBOARD_TABLE %}
                 {% if scoreboard_standings %}
 
-                  <div id="scoreboard" class="row">
-                    <div class="col-md-12">
-                      <table class="table table-striped">
-                        <thead>
-                        <tr>
-                          <td style="width: 10px"><b>Place</b></td>
-                          <td><b>{{ get_mode_as_word(capitalize=True) }}</b></td>
-                          <td><b>Score</b></td>
-                        </tr>
-                        </thead>
+                  <div id="scoreboard" class="d-flex flex-row">
+                    <div class="d-flex flex-column flex-grow-1">
+                      <div class="w95-input-border">
+                        <table class="table table-striped">
+                          <thead>
+                            <tr>
+                              <td style="width: 10px"><b>Place</b></td>
+                              <td><b>{{ get_mode_as_word(capitalize=True) }}</b></td>
+                              <td><b>Score</b></td>
+                            </tr>
+                          </thead>
 
-                        <tbody>
-                        {% for standing in scoreboard_standings %}
-                          <tr>
-                            <th scope="row" class="text-center">{{ loop.index }}</th>
-                            <td>
-                              <a href="#" @click="desktop.createPublicTeamPane({{ standing.account_id }}); event.stopPropagation();">
-                                {{ standing.name | truncate(50) }}
+                          <tbody>
+                          {% for standing in scoreboard_standings %}
+                            <tr>
+                              <th scope="row" class="text-center">{{ loop.index }}</th>
+                              <td>
+                                <a href="#" @click="desktop.createPublicTeamPane({{ standing.account_id }}); event.stopPropagation();">
+                                  {{ standing.name | truncate(50) }}
 
-                                {% if standing.oauth_id %}
-                                  {% if Configs.user_mode == 'teams' %}
-                                    <a href="https://majorleaguecyber.org/t/{{ standing.name }}">
-                                      <span class="badge bg-primary ms-2">Official</span>
-                                    </a>
-                                  {% elif Configs.user_mode == 'users' %}
-                                    <a href="https://majorleaguecyber.org/u/{{ standing.name }}">
-                                      <span class="badge bg-primary ms-2">Official</span>
-                                    </a>
+                                  {% if standing.oauth_id %}
+                                    {% if Configs.user_mode == 'teams' %}
+                                      <a href="https://majorleaguecyber.org/t/{{ standing.name }}">
+                                        <span class="badge bg-primary ms-2">Official</span>
+                                      </a>
+                                    {% elif Configs.user_mode == 'users' %}
+                                      <a href="https://majorleaguecyber.org/u/{{ standing.name }}">
+                                        <span class="badge bg-primary ms-2">Official</span>
+                                      </a>
+                                    {% endif %}
                                   {% endif %}
-                                {% endif %}
-                              </a>
-                            </td>
-                            <td>{{ standing.score }}</td>
-                          </tr>
-                        {% endfor %}
-                        </tbody>
-
-                      </table>
+                                </a>
+                              </td>
+                              <td>{{ standing.score }}</td>
+                            </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
-
                 {% endif %}
               {% endcache %}
               `
@@ -1182,8 +1183,8 @@
                 taskbar_title: "Scoreboard",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/chart1-1.png",
-                width: "600px",
-                height: "400px",
+                width: "400px",
+                height: "600px",
               });
             }
 
