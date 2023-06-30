@@ -189,7 +189,7 @@ Alpine.data("ChallengeBoard", () => ({
   getCategories() {
     const categories = [];
 
-    this.challenges.forEach(challenge => {
+    (this.challenges||[]).forEach(challenge => {
       const { category } = challenge;
 
       if (!categories.includes(category)) {
@@ -529,6 +529,8 @@ Alpine.data("TeamDisbandModal", () => ({
     let response = await CTFd.pages.teams.disbandTeam();
 
     if (response.success) {
+      localStorage.clear();
+      // tell desktop to close all tabs
       window.location.reload();
     } else {
       this.errors = response.errors[""];
@@ -737,7 +739,7 @@ const userComponent = PANE_USER_ID => ({
     const categories = [];
     const breakdown = {};
 
-    this.solves.map(solve => {
+    this.solves.data.map(solve => {
       categories.push(solve.challenge.category);
     });
 
@@ -775,7 +777,7 @@ const userComponent = PANE_USER_ID => ({
     this.user = await data.json();
 
     this.team = {};
-    if (this.user.data && this.user.data.user_id) {
+    if (this.user.data && this.user.data.team_id) {
       const team = await CTFd.fetch(`/api/v1/teams/${this.user.data.team_id}`, {
         method: "GET",
       });

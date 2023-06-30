@@ -297,6 +297,8 @@
               this.name = params.name;
               this.desktop = params.desktop;
               this.title = params.title;
+              this.recreate = params.recreate ?? null;
+              this.recreate_args = params.recreate_args ?? [],
               this.taskbar_title = params.taskbar_title ?? params.title;
               this.initial_body_elem = params.initial_body_elem;
               this.icon_path = params.icon_path ?? null;
@@ -544,6 +546,8 @@
               return {
                 name: this.name,
                 title: this.title,
+                recreate: this.recreate,
+                recreate_args: this.recreate_args,
                 taskbar_title: this.taskbar_title,
                 initial_body_elem: this.initial_body_elem,
                 icon_path: this.icon_path,
@@ -752,7 +756,15 @@
                 this.reset();
                 return;
               }
-              saved_panes.forEach(saved_pane => this.createPane(saved_pane))
+              saved_panes.forEach(saved_pane => {
+                if (saved_pane.recreate) {
+                  console.log('Restoring pane through JS:', saved_pane.name)
+                  this[saved_pane.recreate](...saved_pane.recreate_args)
+                } else {
+                  console.log('Restoring pane:', saved_pane.name)
+                  this.createPane(saved_pane)
+                }
+              })
             }
 
             reset() {
@@ -797,6 +809,8 @@
               `;
               this.createPane({
                 name: "alert",
+                recreate: `createAlertPane`,
+                recreate_args: [params],
                 title: title,
                 taskbar_title: title,
                 initial_body_elem: elem,
@@ -863,6 +877,7 @@
               this.createPane({
                 name: "login",
                 title: "Welcome to UIUCTF 2023",
+                recreate: `createLoginPane`,
                 taskbar_title: "Log In",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/key_win-1.png",
@@ -878,8 +893,8 @@
               const elem = `
               <div class="d-flex flex-column h-100 w-100 overflow-hidden" x-data="{selected: 'about'}">
                 <h5>Welcome to <b>UIUCTF 2023</b></h5>
-                <div class="d-flex flex-row h-100 w-100 mt-3">
-                  <div class="info-panel d-flex flex-column flex-grow-1 p-3 overflow-auto">
+                <div class="d-flex flex-row w-100 mt-3">
+                  <div class="info-panel d-flex flex-column flex-grow-1 overflow-auto">
                     <template x-if="selected == 'about'">
                       <div>
                         <div class="d-flex flex-row align-items-center">
@@ -888,6 +903,7 @@
                         </div>
                         <p>We have a <a href="https://discord.gg/9x2DBQXf96" target="_blank" rel="noopener noreferrer"> Discord server!</a></p>
                         <p>Click Start > Log in... to get started.</p>
+                        <p>If you do not like the theme, you can redirect to the main CTFd instance <a href="/challenges" target="_blank" rel="noopener noreferrer">here</a>.</p>
                       </div>
                     </template>
                     <template x-if="selected == 'when'">
@@ -1000,6 +1016,7 @@
               this.createPane({
                 name: "info",
                 title: "Information",
+                recreate: `createInfoPane`,
                 taskbar_title: "Information",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/help_book_big-1.png",
@@ -1090,6 +1107,7 @@
                 name: "register",
                 title: "Register for UIUCTF 2023",
                 taskbar_title: "Register",
+                recreate: `createRegisterPane`,
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/msagent-1.png",
                 hide_minimize: true,
@@ -1160,6 +1178,7 @@
               this.createPane({
                 name: "scoreboard",
                 title: "Scoreboard",
+                recreate: `createScoreboardPane`,
                 taskbar_title: "Scoreboard",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/chart1-1.png",
@@ -1413,6 +1432,7 @@
                 name: "settings",
                 title: "Settings",
                 taskbar_title: "Settings",
+                recreate: 'createSettingsPane',
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/settings_gear-1.png",
                 hide_close: false,
@@ -1479,7 +1499,7 @@
                       </div>
 
                       <div x-show="loaded">
-                        <template x-for="(category, idx) in getCategories()" :key="idx">
+                        <template x-for="(category, idx) in (getCategories() || [])" :key="idx">
                           <div class="mb-2">
                             <div class="category-header">
                               <p x-text="category" class="h5 m-0"></p>
@@ -1532,6 +1552,7 @@
                 this.createPane({
                   name: "challenges",
                   title: "Challenges",
+                  recreate: 'createChallengesPane',
                   taskbar_title: "Challenges",
                   initial_body_elem: elem,
                   icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
@@ -1570,6 +1591,7 @@
                 name: "reset_password",
                 title: "Reset Password",
                 taskbar_title: "Reset Password",
+                recreate: 'createResetPasswordPane',
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-0.png",
                 hide_maximize: true,
@@ -1779,8 +1801,10 @@
                 name: "team",
                 title: `Team Info`,
                 taskbar_title: `Team Info`,
+                recreate: `createPublicTeamPane`,
+                recreate_args: [PANE_TEAM_ID],
                 initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_users.png",
                 hide_maximize: true,
                 disable_resize: false,
                 transform: "center",
@@ -1793,9 +1817,7 @@
               const elem = `
               <div x-data="UserGraphsPublic(${PANE_USER_ID})">
 
-<div class="jumbotron">
   <div class="container">
-    <h1 x-text="user.data.name">New theme??!</h1>
     <h1 x-text="user.data.name"></h1>
 
       <h2 x-show="user.data.team_id">
@@ -1805,12 +1827,12 @@
         </a>
       </h2>
 
-    <div class="pt-2">
-        <h3 class="d-inline-block mx-1" x-show="user.data.affiliation">
+    <div class="pt-2" x-show="user.data.affiliation || user.data.country">
+        <h3 class="d-inline-block mx-1" x-show.important="user.data.affiliation">
           <span class="badge rounded-pill bg-primary" x-text="user.data.affiliation"></span>
         </h3>
 
-        <h3 class="d-inline-block mx-1" x-show="user.data.country">
+        <h3 class="d-inline-block mx-1" x-show.important="user.data.country">
           <span class="badge rounded-pill bg-primary">
               <i class="\`flag-\${user.data.country.toLowerCase()}\`"></i>
               <span x-text="user.data.country"></span>
@@ -1818,15 +1840,15 @@
         </h3>
     </div>
 
-    <div>
-      <h2 class="text-center" x-show="user.data.place">
-        <div x-text="user.data.place">
+    <div class="d-flex flex-row pb-3" x-show="user.data.place || user.data.data">
+      <h4 class="d-flex flex-row align-items-baseline" x-show="user.data.place">
+        <span x-text="user.data.place" class="pr-1"></span>
           <small>place</small>
-        </h2>
-        <h2 class="text-center" x-show="user.data && user.data.score">
-        <div x-text="user.data.score">
+        </h4>
+        <h4 class="d-flex flex-row align-items-baseline ml-2" x-show="user.data && user.data.score">
+        <span x-text="user.data.score" class="pr-1"></span>
         <small>points</small>
-      </h2>
+      </h4>
     </div>
 
     <div class="pt-3" x-show="user.data.website">
@@ -1837,9 +1859,6 @@
           ></i>
         </a>
     </div>
-  </div>
-</div>
-<div class="container">
   {% include "components/errors.html" %}
     <div class="row">
       <div class="col-md-12">
@@ -1946,8 +1965,10 @@
                 name: "user",
                 title: `User Info`,
                 taskbar_title: `User Info`,
+                recreate: `createPublicUserPane`,
+                recreate_args: [PANE_USER_ID],
                 initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_user.png",
                 hide_maximize: true,
                 disable_resize: false,
                 transform: "center",
@@ -1969,6 +1990,7 @@
             async doTeamJoinForm(event) {
               const response = await fetch('/teams/join', {
                 method: 'POST',
+                redirect: "manual",
                 body: new FormData(event.target)
               })
               const statusCode = response.status
@@ -1978,6 +2000,7 @@
               const error = (matches && matches.length > 1) ? matches[1] : null
               if (error === null) {
                 this.closePanes('team_join')
+                this.closePanes('team_create')
                 this.closePanes('team')
                 if (statusCode === 403) {
                   this.createAlertPane({"title": "Team Join Error","content": "Team Join form expired. Please try again."});
@@ -2022,8 +2045,9 @@
                 name: "team_join",
                 title: `Team Join`,
                 taskbar_title: `Team Join`,
+                recreate: `createPrivateTeamJoinPane`,
                 initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_users.png",
                 hide_maximize: true,
                 disable_resize: false,
                 transform: "center",
@@ -2036,6 +2060,7 @@
             async doTeamCreateForm(event) {
               const response = await fetch('/teams/new', {
                 method: 'POST',
+                redirect: "manual",
                 body: new FormData(event.target)
               })
               const statusCode = response.status
@@ -2043,9 +2068,10 @@
               
               const matches = html.match(/role="alert"[\s\S]*?span>([\s\S]*?)<\/span>/m)
               const error = (matches && matches.length > 1) ? matches[1] : null
-              if (error === null) {
+              if (error === null || error.trim().length === 0) {
                 this.closePanes('team_create')
                 this.closePanes('team')
+                this.closePanes('team_join')
                 if (statusCode === 403) {
                   this.createAlertPane({"title": "Team Create Error","content": "Team Create form expired. Please try again."});
                 } else {
@@ -2054,6 +2080,7 @@
                 location.reload();
               } else {
                 this.createAlertPane({"title" : 'Team Create Error', "content": error });
+                this.closePanes('team')
               }
             }
             // new_team.html
@@ -2093,8 +2120,9 @@
                 name: "team_create",
                 title: `Team Create`,
                 taskbar_title: `Team Create`,
+                recreate: `createPrivateTeamCreatePane`,
                 initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_users.png",
                 hide_maximize: true,
                 disable_resize: false,
                 transform: "center",
@@ -2351,8 +2379,9 @@
                 name: "team",
                 title: `My Team`,
                 taskbar_title: `My Team`,
+                recreate: `createPrivateTeamPane`,
                 initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_users.png",
                 hide_maximize: true,
                 disable_resize: false,
                 transform: "center",
@@ -2370,7 +2399,7 @@
         
         {% if user.team_id %}
         <h2>
-          <a href="#" @click="desktop.createPrivateTeamPane({{ user.team_id }})">
+          <a href="#" @click="desktop.createPrivateTeamPane({{ user.team_id }}); event.stopPropagation()">
             <span class="badge bg-secondary">
               {{ user.team.name }}
 						</span>
@@ -2571,8 +2600,9 @@
                 name: "user",
                 title: `My User`,
                 taskbar_title: `My User`,
+                recreate: `createPrivateUserPane`,
                 initial_body_elem: elem,
-                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
+                icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_user.png",
                 hide_maximize: true,
                 disable_resize: false,
                 transform: "center",
@@ -2759,6 +2789,8 @@
                 name: "challenge",
                 title: `${c.name}`,
                 taskbar_title: `${c.name}`,
+                recreate: `createChallengePane`,
+                recreate_args: [id],
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/computer-3.png",
                 hide_maximize: true,
@@ -3108,28 +3140,28 @@
                   <img src="/themes/uiuctf-2023-ctfd-theme/static/img/start-menu-logo-sideways.png" />
                 </div>
                 <div class="main-options">
-                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createChallengesPane()">
+                  <div :class="''" @click="desktop.createChallengesPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png" />
                     <span class="user-select-none">
                       Challenges
                     </span>
                   </div>
-                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createScoreboardPane()">
+                  <div :class="$store.globals.user === null ? 'pe-none item-disabled user-select-none' : ''" @click="desktop.createScoreboardPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/chart1-1.png" />
                     <span>
                       Scoreboard
                     </span>
                   </div>
-                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createPrivateUserPane()">
+                  <div :class="$store.globals.user === null ? 'pe-none item-disabled user-select-none' : ''" @click="desktop.createPrivateUserPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_user.png" />
                     <span>
-                      Users
+                      My User
                     </span>
                   </div>
-                  <div :class="$store.globals.user === null ? 'pe-none item-disabled' : ''" @click="desktop.createPrivateTeamPane()">
+                  <div :class="$store.globals.user === null ? 'pe-none item-disabled user-select-none' : ''" @click="desktop.createPrivateTeamPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_users.png" />
                     <span>
-                      Teams
+                      My Team
                     </span>
                   </div>
                   <div style="border-bottom: 1px solid #808080"  @click="desktop.createInfoPane()">
