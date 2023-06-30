@@ -159,11 +159,9 @@
       margin-left: 0.125rem;
     }
 
-    /* For help pane */
     .info-panel {
-        background: #feffd1;
-        max-height: 300px;
-        overflow: auto;
+      background: #feffd1;
+      overflow: auto;
     }
   </style>
 
@@ -718,6 +716,12 @@
               window.location.reload();
             }
 
+            async closeAllPanes() {
+              this.panes.forEach((pane) => {
+                pane.close();
+              });
+            }
+
             async createAlertPane(params) {
               if (!params.title) throw new Error("Alert pane must have a title");
               if (!params.content) throw new Error("Alert pane must have content");
@@ -824,137 +828,134 @@
             }
 
             createInfoPane() {
-              const elem = `<div x-data="{selected: 'about'}"><h5>Welcome to <b>UIUCTF 2023</b></h5>
-                            <div class="d-flex mt-3 flex-column">
-                                <div class="d-flex flex-row">
-                                    
-                                    <div class="info-panel d-flex flex-column p-3 w-100">
-                                        <template x-if="selected == 'about'">
-                                            <div>
-                                              <div class="d-flex flex-row align-items-center">
-                                                  <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/tip.png" alt="">
-                                                  <p class="font-weight-bold ml-2 mt-2">Did you know...</p>
-                                              </div>
-                                              <p>We have a <a href="https://discord.gg/9x2DBQXf96" target="_blank" rel="noopener noreferrer"> Discord server!</a></p>
-                                              <p>Click Start > Log in... to get started.</p>
-                                            </div>
-                                        </template>
-                                        <template x-if="selected == 'when'">
-                                          <div>
-                                            <p>
-                                            UIUCTF 2023 will be held Sat, 01 July 2023, 00:00 UTC — Mon, 03 July 2023, 00:00 UTC.
-                                            </p>
-                                            <!-- https://codepen.io/harsh/pen/KKdEVPV -->
-                                            <div x-data="timer((window.init.end !== null) ? window.init.end * 1000 : window.init.start * 1000)">
-                                              <h1 x-text="\`\${time().days}d:\${time().hours}h:\${time().minutes}m:\${time().seconds}s\`"></h1>
-                                            </div>
-                                          </div>
-                                        </template>
-                                        <template x-if="selected == 'prizes'">
-                                            <div>
-                                              <p> As Gill Bates once said, 5.736K ought to be enough for anybody.<br>
-                                                That's why we are distributing exactly that much money!</p>
-                                              <ul>
-                                                <li>First Place - $2048</li>
-                                                <li>Second Place - $1024</li>
-                                                <li>Third Place - $512</li>
-                                                <li>4th / 5th Place - $256</li>
-                                                <li>6th - 10th Place - $128</li>
-                                                <li>Writeup Prize Money - $1000</li>
-                                              </ul>
-                                            </div>
-                                        </template>
-                                        <template x-if="selected == 'sponsors'">
-                                            <div>
-                                              <p>
-                                                  SIGPwny thanks its UIUCTF 2023 sponsors:
-                                              </p>
-                                              <div class="row">
-                                                  <div class="col-6 mb-2">
-                                                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/battelle-blue.png" class="img-fluid" alt="">
-                                                  </div>
-                                                  <div class="col-6 mb-2">
-                                                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/zellic2.png" class="img-fluid" alt="">
-                                                  </div>
-                                                  <div class="col-6 mb-2">
-                                                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/trail-of-bits.png" class="img-fluid" alt="">
-                                                  </div>
-                                                  <div class="col-6 mb-2">
-                                                      <a href="https://davidan.dev"><img src="https://davidan.dev/logo.png" class="img-fluid" alt=""></a>
-                                                  </div>
-                                                  <div class="col-6 mb-2">
-                                                      <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/google-cloud.png" class="img-fluid" alt="">
-                                                      <p>Infra sponsored by <a href="https://goo.gle/ctfsponsorship" target="_blank" rel="noopener noreferrer">goo.gle/ctfsponsorship</a></p>
-                                                  </div>
-                                              </div>
-                                            </div>
-                                            </template>
-                                        <template x-if="selected == 'team'">
-                                            <div class="d-flex flex-column">
-                                                <p>Meet the UIUCTF 2023 Team!!</p>
-                                                <div class="row" x-data="{people: [
-                                                    { name:'Pete Stenger', img:'https://avatars.githubusercontent.com/u/13869303', href:'https://github.com/reteps' },
-                                                    { name:'Richard Liu', img:'https://avatars.githubusercontent.com/u/9328196', href:'https://github.com/richyliu' },
-                                                    { name:'Hassam Uddin', img:'https://avatars.githubusercontent.com/u/13320947', href:'https://hassamuddin.com' },
-                                                    { name:'YiFei Zhu', img:'https://lh3.googleusercontent.com/a-/ACB-R5SiFvHe6qP5yi3wJVNMUQqolSc-SRIl_ncQvhC_', href:'https://github.com/zhuyifei1999' },
-                                                    { name:'kuilin', img:'https://kuilin.net/profile_upscaled.png', href:'https://kuilin.net/' },
-                                                    { name:'David An', img:'https://davidan.dev/dave.jpeg', href:'https://davidan.dev' },
-                                                    { name:'Ellie Popoca', img:'https://i.imgur.com/jVsQDUP.gif', href:'https://www.linkedin.com/in/elliepopoca' },
-                                                    { name:'Pomona Carrington-Hoekstra', img:'https://avatars.githubusercontent.com/u/86129353' },
-                                                    { name:'George Huebner', img:'https://avatars.githubusercontent.com/u/44840644', href:'https://github.com/Feyorsh' },
-                                                    { name:'Joseph Ravichandran', img:'https://i.imgur.com/XOk7y7X.jpg', href:'https://twitter.com/0xjprx' },
-                                                    { name:'Minh Duong', img:'https://avatars.githubusercontent.com/u/35712968', href:'https://whitehoodhacker.net/' },
-                                                    { name:'Anakin Dey', img:'https://avatars.githubusercontent.com/spamakin', href:'https://www.anakin-dey.com/' },
-                                                    { name:'Nitya Sunkad', img:'https://avatars.githubusercontent.com/u/52294194?v=4', href:'https://www.linkedin.com/in/nsunkad' },
-                                                    { name:'Anusha Ghosh', img:'https://avatars.githubusercontent.com/u/35054976' }
-                                                ]}">
-                                                  <template x-for="person in people">
-                                                    <div class="col-6 col-md-4 col-lg-3 d-flex align-items-center flex-column mb-2">
-                                                        <img x-bind:src="person.img" class="img-fluid" alt="">
-                                                        <a x-bind:href="person.href">
-                                                            <span class="font-xsmall mt-1" x-text="person.name"></span>
-                                                        </a>
-                                                    </div>
-                                                  </template>
-
-                                                </div>
-                                            </div>
-                                          </template>
-                                            
-                                    </div>
-                                <div class="d-flex flex-column pl-2">
-                                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'about' ? 'border-dark' : ''}\`" type="button" @click="selected = 'about'"><span
-                                        class="btn-text">About</span></button>
-                                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'when' ? 'border-dark' : ''}\`" type="button" @click="selected = 'when'"><span
-                                        class="btn-text">When</span></button>
-                                        <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'prizes' ? 'border-dark' : ''}\`" type="button" @click="selected = 'prizes'"><span
-                                            class="btn-text">Prizes</span></button>
-                                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'sponsors' ? 'border-dark' : ''}\`" type="button" @click="selected = 'sponsors'"><span
-                                        class="btn-text">Sponsors</span></button>
-                                        <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'team' ? 'border-dark' : ''}\`" type="button" @click="selected = 'team'"><span
-                                            class="btn-text">Team</span></button>
-                                        </div>
-                                    </div>
-                                <div class="d-flex flex-row mt-2">
-                                    <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox">
-                                        <span class="form-check-x"></span>
-                                        <span class="form-check-sign"></span>
-                                        <span class="font-xsmall">
-                                            Show this Welcome Screen next time you start Windows
-                                        </span>
-                                    </label>
-                                </div></div>`
+              const elem = `
+              <div class="d-flex flex-column h-100 w-100 overflow-hidden" x-data="{selected: 'about'}">
+                <h5>Welcome to <b>UIUCTF 2023</b></h5>
+                <div class="d-flex flex-row h-100 w-100 mt-3">
+                  <div class="info-panel d-flex flex-column flex-grow-1 p-3 overflow-auto">
+                    <template x-if="selected == 'about'">
+                      <div>
+                        <div class="d-flex flex-row align-items-center">
+                          <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/tip.png" alt="">
+                          <p class="font-weight-bold ml-2 mt-2">Did you know...</p>
+                        </div>
+                        <p>We have a <a href="https://discord.gg/9x2DBQXf96" target="_blank" rel="noopener noreferrer"> Discord server!</a></p>
+                        <p>Click Start > Log in... to get started.</p>
+                      </div>
+                    </template>
+                    <template x-if="selected == 'when'">
+                      <div>
+                        <p>
+                          UIUCTF 2023 will be held Sat, 01 July 2023, 00:00 UTC — Mon, 03 July 2023, 00:00 UTC.
+                        </p>
+                        <!-- https://codepen.io/harsh/pen/KKdEVPV -->
+                        <div x-data="timer((window.init.end !== null) ? window.init.end * 1000 : window.init.start * 1000)">
+                          <h1 x-text="\`\${time().days}d:\${time().hours}h:\${time().minutes}m:\${time().seconds}s\`"></h1>
+                        </div>
+                      </div>
+                    </template>
+                    <template x-if="selected == 'prizes'">
+                      <div>
+                        <p>
+                          As Gill Bates once said, 5.736K ought to be enough for anybody.<br>
+                          That's why we are distributing exactly that much money!
+                        </p>
+                        <ul>
+                          <li>First Place - $2048</li>
+                          <li>Second Place - $1024</li>
+                          <li>Third Place - $512</li>
+                          <li>4th / 5th Place - $256</li>
+                          <li>6th - 10th Place - $128</li>
+                          <li>Writeup Prize Money - $1000</li>
+                        </ul>
+                      </div>
+                    </template>
+                    <template x-if="selected == 'sponsors'">
+                      <div>
+                        <p>
+                          SIGPwny thanks its UIUCTF 2023 sponsors:
+                        </p>
+                        <div class="row">
+                          <div class="col-6 mb-2">
+                            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/battelle-blue.png" class="img-fluid" alt="">
+                          </div>
+                          <div class="col-6 mb-2">
+                            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/zellic2.png" class="img-fluid" alt="">
+                          </div>
+                          <div class="col-6 mb-2">
+                            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/trail-of-bits.png" class="img-fluid" alt="">
+                          </div>
+                          <div class="col-6 mb-2">
+                            <a href="https://davidan.dev"><img src="https://davidan.dev/logo.png" class="img-fluid" alt=""></a>
+                          </div>
+                          <div class="col-6 mb-2">
+                            <img src="/themes/uiuctf-2023-ctfd-theme/static/img/sponsor/google-cloud.png" class="img-fluid" alt="">
+                            <p>Infra sponsored by <a href="https://goo.gle/ctfsponsorship" target="_blank" rel="noopener noreferrer">goo.gle/ctfsponsorship</a></p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <template x-if="selected == 'team'">
+                      <div class="d-flex flex-column">
+                        <p>Meet the UIUCTF 2023 Team!!</p>
+                          <div
+                            class="row"
+                            x-data="{people: [
+                              { name:'Pete Stenger', img:'https://avatars.githubusercontent.com/u/13869303', href:'https://github.com/reteps' },
+                              { name:'Richard Liu', img:'https://avatars.githubusercontent.com/u/9328196', href:'https://github.com/richyliu' },
+                              { name:'Hassam Uddin', img:'https://avatars.githubusercontent.com/u/13320947', href:'https://hassamuddin.com' },
+                              { name:'YiFei Zhu', img:'https://lh3.googleusercontent.com/a-/ACB-R5SiFvHe6qP5yi3wJVNMUQqolSc-SRIl_ncQvhC_', href:'https://github.com/zhuyifei1999' },
+                              { name:'kuilin', img:'https://kuilin.net/profile_upscaled.png', href:'https://kuilin.net/' },
+                              { name:'David An', img:'https://davidan.dev/dave.jpeg', href:'https://davidan.dev' },
+                              { name:'Ellie Popoca', img:'https://i.imgur.com/jVsQDUP.gif', href:'https://www.linkedin.com/in/elliepopoca' },
+                              { name:'Pomona Carrington-Hoekstra', img:'https://avatars.githubusercontent.com/u/86129353' },
+                              { name:'George Huebner', img:'https://avatars.githubusercontent.com/u/44840644', href:'https://github.com/Feyorsh' },
+                              { name:'Joseph Ravichandran', img:'https://i.imgur.com/XOk7y7X.jpg', href:'https://twitter.com/0xjprx' },
+                              { name:'Minh Duong', img:'https://avatars.githubusercontent.com/u/35712968', href:'https://whitehoodhacker.net/' },
+                              { name:'Anakin Dey', img:'https://avatars.githubusercontent.com/spamakin', href:'https://www.anakin-dey.com/' },
+                              { name:'Nitya Sunkad', img:'https://avatars.githubusercontent.com/u/52294194?v=4', href:'https://www.linkedin.com/in/nsunkad' },
+                              { name:'Anusha Ghosh', img:'https://avatars.githubusercontent.com/u/35054976' },
+                              { name:'Emma Hartman', img:'https://avatars.githubusercontent.com/u/52719328?v=4', href:'https://www.linkedin.com/in/eihart123' }
+                            ]}"
+                            x-init="people.sort((a, b) => 0.5 - Math.random())"
+                          >
+                          <template x-for="person in people">
+                            <div class="col-6 col-md-4 col-lg-3 d-flex align-items-center text-center flex-column mb-2">
+                              <img x-bind:src="person.img" class="img-fluid" alt="">
+                              <a x-bind:href="person.href">
+                                <span class="font-xsmall mt-1" x-text="person.name"></span>
+                              </a>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="d-flex flex-column pl-2">
+                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'about' ? 'border-dark' : ''}\`" type="button" @click="selected = 'about'">
+                      <span class="btn-text">About</span>
+                    </button>
+                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'when' ? 'border-dark' : ''}\`" type="button" @click="selected = 'when'">
+                      <span class="btn-text">When</span>
+                    </button>
+                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'prizes' ? 'border-dark' : ''}\`" type="button" @click="selected = 'prizes'">
+                      <span class="btn-text">Prizes</span>
+                    </button>
+                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'sponsors' ? 'border-dark' : ''}\`" type="button" @click="selected = 'sponsors'">
+                      <span class="btn-text">Sponsors</span>
+                    </button>
+                    <button :class="\`btn btn-sm mb-1 btn-primary \${selected == 'team' ? 'border-dark' : ''}\`" type="button" @click="selected = 'team'">
+                      <span class="btn-text">Team</span>
+                    </button>
+                  </div>
+                </div>
+              </div>`
               this.createPane({
                 name: "info",
                 title: "Information",
                 taskbar_title: "Information",
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/help_book_big-1.png",
-                hide_minimize: false,
-                hide_maximize: true,
-                hide_close: false,
                 width: "600px",
                 height: "300px",
                 transform: "center",
@@ -1366,21 +1367,15 @@
               
             }
 
-            async closeAllPanes() {
-              this.panes.forEach((pane) => {
-                pane.close();
-              });
-            }
-
             async createConfirmClosePane() {
               this.createPane({
                 name: "close",
                 title: "Confirm Close All",
-                taskbar_title: "Close",
+                taskbar_title: "Confirm Close All",
                 initial_body_elem: `
                   <div class="d-flex flex-row user-select-none">
                     <div class="m-2">
-                      <img class="flex-shrink-0" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-1.png">
+                      <img class="flex-shrink-0" src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/recycle_bin_full-0.png">
                     </div>
                     <div class="m-2">
                       <p>
@@ -1495,7 +1490,6 @@
                 });
                 return;
               }
-              console.log(c);
               // Generate unique ID for tab selection
               let uniq, elem_id;
               do {
@@ -1740,9 +1734,7 @@
 {% block page %}
   <div x-data="desktop" class="min-vh-100 d-flex flex-column bg-secondary">
     <!-- Desktop -->
-    <main x-ref="desktop" class="d-flex flex-grow-1 w-100 flex-column">
-
-    </main>
+    <div class="d-flex flex-grow-1 position-relative" x-ref="desktop"></div>
 
     <!-- Taskbar -->
     <footer class="d-flex position-relative">
