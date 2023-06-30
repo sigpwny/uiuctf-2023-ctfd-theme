@@ -1544,23 +1544,23 @@
               window.CTFd.fetch("/api/v1/challenges")
                 .then(response => response.json())
                 .then(data => {
+                  this.createPane({
+                    name: "challenges",
+                    title: "Challenges",
+                    recreate: 'createChallengesPane',
+                    taskbar_title: "Challenges",
+                    initial_body_elem: elem,
+                    icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
+                    width: "600px",
+                    height: "400px",
+                    disable_padding: true,
+                  });
                   if (!data.success) {
                     this.createAlertPane({
                       title: "403 Error",
                       content: `/challenges is not accessible.<br/><br/>Access is denied.<br/><br/>You may need to <a href="#" @click="desktop.createLoginPane(); event.stopPropagation();">log in</a>, or <a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">be on a team</a>.`,
                     });
                   }
-                this.createPane({
-                  name: "challenges",
-                  title: "Challenges",
-                  recreate: 'createChallengesPane',
-                  taskbar_title: "Challenges",
-                  initial_body_elem: elem,
-                  icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
-                  width: "600px",
-                  height: "400px",
-                  disable_padding: true,
-                });
                 });
             }
 
