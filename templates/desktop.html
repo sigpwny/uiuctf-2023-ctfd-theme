@@ -203,6 +203,10 @@
       background: #feffd1;
       overflow: auto;
     }
+
+    .modal-backdrop {
+      z-index: -1; /* no more unclicky */
+    }
   </style>
 
   <script type="text/javascript">
@@ -1276,7 +1280,7 @@
 
       {% with form = Forms.self.TokensForm() %}
         <form method="POST" x-data="TokensForm" @submit.prevent="generateToken()" class="mb-3">
-          <div class="modal fade" tabindex="-1" x-ref="tokenModal">
+          <div class="modal" tabindex="-1" x-ref="tokenModal">
             <div class="modal-dialog modal-lg">
               <div class="modal-content">
                 <div class="modal-header">
@@ -1382,16 +1386,16 @@
             {% for token in settings_tokens %}
               <tr x-ref="token-{{ token.id }}">
                 <td class="text-center">
-                  <span data-time="{{ token.created | isoformat }}"></span>
+                  <span x-text="'{{ token.created.strftime('%Y-%m-%d %H:%M') }}'" data-time="{{ token.created | isoformat }}"></span>
                 </td>
                 <td>
-                  <span data-time="{{ token.expiration | isoformat }}"></span>
+                  <span x-text="'{{ token.created.strftime('%Y-%m-%d %H:%M') }}'" data-time="{{ token.expiration | isoformat }}"></span>
                 </td>
                 <td class="text-center">
                   <span
                       class="delete-token" role="button"
                       @click="deleteTokenModal({{ token.id }})">
-                      <i class="cursor-pointer fas fa-times"></i>
+                      Delete
                   </span>
                 </td>
               </tr>
@@ -1489,7 +1493,6 @@
                                   style="width: 64px;"
                                   onclick="/* TODO: highlight icon/text (and remove when unclicked), on mobile open challenge */"
                                   @click="desktop.createChallengePane(c.id); event.stopPropagation();"
-                                  @dblclick="desktop.createChallengePane(c.id); event.stopPropagation();"
                                 >
                                   <img
                                     :value="c.id"
@@ -1521,24 +1524,23 @@
               window.CTFd.fetch("/api/v1/challenges")
                 .then(response => response.json())
                 .then(data => {
-                  if (data.success) {
-                    this.createPane({
-                      name: "challenges",
-                      title: "Challenges",
-                      taskbar_title: "Challenges",
-                      initial_body_elem: elem,
-                      icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
-                      width: "600px",
-                      height: "400px",
-                      disable_padding: true,
-                    });
-                  } else {
+                  if (!data.success) {
                     this.createAlertPane({
                       title: "403 Error",
                       content: `/challenges is not accessible.<br/><br/>Access is denied.<br/><br/>You may need to <a href="#" @click="desktop.createLoginPane(); event.stopPropagation();">log in</a>, or <a href="#" @click="desktop.createPrivateTeamPane(); event.stopPropagation();">be on a team</a>.`,
                     });
                   }
-                })
+                this.createPane({
+                  name: "challenges",
+                  title: "Challenges",
+                  taskbar_title: "Challenges",
+                  initial_body_elem: elem,
+                  icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/directory_open_file_mydocs_small-1.png",
+                  width: "600px",
+                  height: "400px",
+                  disable_padding: true,
+                });
+                });
             }
 
             // Form ONLY for initial reset, not for the email callback. email callback goes back to main reset password page.
@@ -1582,45 +1584,46 @@
             async createPublicTeamPane(PANE_TEAM_ID) {
               // Will need an API call or GET/POSTs to the real page (b/c teamID)
               const elem = `
-  <div>
-    <div class="container" x-data="TeamGraphsPublic(${PANE_TEAM_ID})">
-      <h1 id="team-id" x-text="team.data.name"></h1>
+  <div x-data="TeamGraphsPublic(${PANE_TEAM_ID})">
+    <div class="container">
+      <h1 id="team-id" x-text="team?.data?.name"></h1>
 
-        <h3 class="d-inline-block mx-1" x-show="team.data.affiliation">
-          <span class="badge bg-primary rounded-pill" x-text="team.data.affiliation"></span>
+        <h3 class="mx-1" x-show.important="team?.data?.affiliation">
+          <span class="badge bg-primary rounded-pill" x-text="team?.data?.affiliation"></span>
         </h3>
 
-        <h3 class="d-inline-block mx-1" x-show="team.data.country">
+        <h3 class="mx-1" x-show.important="team?.data?.country">
 					<span class="badge bg-primary rounded-pill">
-						<i :class="\`flag-\${team.data.country.toLowerCase()}\`"></i>
-						<span x-text="team.data.country">
+						<i :class="\`flag-\${team?.data?.country ? team.data.country.toLowerCase() : ''}\`"></i>
+						<span x-text="team?.data?.country">
 					</span>
         </h3>
 
-      <div class="pt-2">
-        <a x-show="team.data.website && team.data.website.startswith('http')" x-bind:href="team.data.website" target="_blank" style="color: inherit;" rel="noopener">
+      <div class="pt-2" x-show.important="team?.data?.website && team?.data?.website.startsWith('http')">
+        <a x-bind:href="team?.data?.website" target="_blank" style="color: inherit;" rel="noopener">
           <i
               class="fas fa-external-link-alt fa-2x px-2" data-toggle="tooltip" data-placement="top"
-              x-bind:title="team.data.website"
+              x-bind:title="team?.data?.website"
           ></i>
         </a>
       </div>
 
-      <hr class="w-50 mx-auto" x-show="!!team.data.website">
+      <hr class="w-50 mx-auto" x-show="!!team?.data?.website">
 
-      <h2 id="team-place" class="text-center">
-        <div x-text="team.data.place"></div>
-        <small x-show="team.data.place">place</small>
-      </h2>
+      <div class="d-flex flex-row">
 
-      <h2 id="team-score" class="text-center">
-        <div x-text="team.data.score"></div>
-        <small x-show="team.data.place">points</small>
-      </h2>
+        <h4 id="team-place" class="d-flex flex-row align-items-baseline">
+          <div x-text="team?.data?.place"></div>
+          <small x-show="team?.data?.place" class="pl-1">place</small>
+        </h2>
+
+        <h4 id="team-score" class="pl-2 d-flex flex-row align-items-baseline">
+          <div x-text="team?.data?.score"></div>
+          <small x-show="team?.data?.score" class="pl-1">points</small>
+        </h2>
+      </div>
     </div>
-  </div>
 
-  <div class="container">
     {% include "components/errors.html" %}
 
     <br>
@@ -1636,12 +1639,12 @@
           </tr>
           </thead>
           <tbody>
-          <template x-for="member in members.data">
+          <template x-for="member in (members.data || [])">
             <tr>
               <td>
                 <a @click="desktop.createPublicUserPane(member.id); event.stopPropagation();" href="#" x-text="member.name"></a>
               </td>
-              <td x-text="member.score"></td>
+              <td x-text="member.points"></td>
             </tr>
           </template>
           </tbody>
@@ -1649,12 +1652,12 @@
       </div>
     </div>
 
-        <div class="row" x-show="awards.data.length > 0">
+        <div class="row" x-show="awards?.data && awards.data.length > 0">
           <div class="col-md-12">
             <h3>Awards</h3>
           </div>
 
-          <template x-for="award in awards.data">
+          <template x-for="award in (awards.data || [])">
             <div class="col-md-3 col-sm-6">
               <p class="text-center">
                 <i :class="\`award-icon award-\${ award.icon } fa-2x\`"></i> <br>
@@ -1685,16 +1688,16 @@
             </tr>
             </thead>
             <tbody>
-            <template x-for="solve in solves.data">
+            <template x-for="solve in (solves?.data || [])">
               <tr>
                 <td class="text-center">
                   <a href="#" x-text="solve.challenge.name" @click="desktop.createChallengePane(solve.challenge.id); event.stopPropagation();">
                   </a>
                 </td>
                 <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
-                <td x-text="solve.challenge.category"></td>
+                <td x-text="solve.challenge.value"></td>
                 <td class="solve-time">
-                  <span x-bind:data-time="solve.date"></span>
+                  <span x-text="new Date(solve.date).toLocaleString()"></span>
                 </td>
               </tr>
             </template>
@@ -1706,7 +1709,7 @@
       <div class="clearfix"></div>
 
       <div class="row">
-        <div class="col-md-6 d-none d-md-block d-lg-block py-4">
+        <div class="col-md-7 d-block d-lg-block py-4">
           <div class="progress">
             <div 
               class="progress-bar" 
@@ -1734,9 +1737,9 @@
             <small x-text="\`Fails (\${getFailPercentage()}%)\`"></small>
           </div>
         </div>
-        <div class="col-md-6 d-none d-md-block d-lg-block py-4">
+        <div class="col-md-7 d-block d-lg-block py-4">
           <div class="progress">
-            <template x-for="category in getCategoryBreakdown()" :key="category.name">
+            <template x-for="category in (getCategoryBreakdown() || [])" :key="category.name">
               <div 
                 class="progress-bar" 
                 role="progressbar" 
@@ -1745,7 +1748,7 @@
               </div>
             </template>
           </div>
-          <template x-for="category in getCategoryBreakdown()" :key="category.name">
+          <template x-for="category in (getCategoryBreakdown() || [])" :key="category.name">
             <div class="ps-2 float-start">
               <svg height="16" width="16">
                 <circle cx="8" cy="8" r="5" :fill="category.color" />
@@ -1757,7 +1760,7 @@
 
         <br class="clearfix">
 
-        <div class="col-md-12 d-none d-md-block d-lg-block">
+        <div class="col-md-12 d-block">
           <div id="score-graph" x-ref="scoregraph" class="w-100 d-flex align-items-center">
             <div class="text-center w-100">
               <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
@@ -1765,12 +1768,12 @@
           </div>
         </div>
       </div>
-      <div class="row min-vh-25" x-show="solves.data.length === 0">
+      <div class="row min-vh-25" x-show="solves?.data && solves.data.length === 0">
         <h3 class="opacity-50 text-center w-100 justify-content-center align-self-center">
           No solves yet
         </h3>
       </div>
-  </div>
+    </div>
   </div>
 `
               this.createPane({
@@ -1821,7 +1824,7 @@
         <div x-text="user.data.place">
           <small>place</small>
         </h2>
-        <h2 class="text-center" x-show="user.data.score">
+        <h2 class="text-center" x-show="user.data && user.data.score">
         <div x-text="user.data.score">
         <small>points</small>
       </h2>
@@ -1861,7 +1864,7 @@
                 <td class="d-none d-md-block d-lg-block" x-text="solve.challenge.category"></td>
                 <td x-text="solve.challenge.value"></td>
                 <td class="solve-time">
-                  <span x-bind:data-time="solve.date"></span>
+                  <span x-text="new Date(solve.date).toLocaleString()"></span>
                 </td>
               </tr>
             </template>
