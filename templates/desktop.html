@@ -2599,8 +2599,8 @@
 `
               this.createPane({
                 name: "user",
-                title: `My User`,
-                taskbar_title: `My User`,
+                title: `My Profile`,
+                taskbar_title: `My Profile`,
                 recreate: `createPrivateUserPane`,
                 initial_body_elem: elem,
                 icon_path: "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_user.png",
@@ -3156,7 +3156,7 @@
                   <div :class="$store.globals.user === null ? 'pe-none item-disabled user-select-none' : ''" @click="desktop.createPrivateUserPane()">
                     <img src="/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/address_book_user.png" />
                     <span>
-                      My User
+                      My Profile
                     </span>
                   </div>
                   <div :class="$store.globals.user === null ? 'pe-none item-disabled user-select-none' : ''" @click="desktop.createPrivateTeamPane()">
