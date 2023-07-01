@@ -1171,7 +1171,7 @@
                 </div>
               </div>
 
-              <div class="d-flex flex-row justify-content-between mt-1"><div>Top 10</div><a href="/scoreboard" class="btn btn-primary">View Full Scoreboard</a></div>
+              <div class="d-flex flex-row justify-content-end mt-1"><a href="/scoreboard" class="btn btn-primary">View Full Scoreboard</a></div>
               {% cache 60, CacheKeys.PUBLIC_SCOREBOARD_TABLE %}
                 {% if scoreboard_standings %}
                   <!-- id="scoreboard" -->
@@ -1726,28 +1726,7 @@
       </div>
     </div>
 
-        <div class="row" x-show="awards?.data && awards.data.length > 0">
-          <div class="col-md-12">
-            <h3>Awards</h3>
-          </div>
-
-          <template x-for="award in (awards.data || [])">
-            <div class="col-md-3 col-sm-6">
-              <p class="text-center">
-                <i :class="\`award-icon award-\${ award.icon } fa-2x\`"></i> <br>
-                <strong x-text="award.name"></strong>
-              </p>
-
-              <p class="text-center" x-text="award.category"></p>
-
-              <p class="text-center" x-text="award.description"></p>
-
-              <p class="text-center" x-text="award.value"></p>
-            </div>
-          </template>
-        </div>
-
-        <br>
+      <br>
 
       <div class="row">
         <div class="col-md-12">
@@ -2523,30 +2502,8 @@
     {% include "components/errors.html" %}
 
     {% set solves = user.solves %}
-    {% set awards = user.awards or [] %}
 
-    {% if solves or awards %}
-      {% if awards %}
-        <div class="row">
-          <div class="col-md-12">
-            <h3>Awards</h3>
-
-          </div>
-          {% for award in awards %}
-            <div class="col-md-3 col-sm-6">
-              <p class="text-center">
-                <i class="award-icon award-{{ award.icon }} fa-2x"></i>
-                <br>
-                <strong>{{ award.name }}</strong>
-              </p>
-              <p class="text-center">{{ award.category or "" }}</p>
-              <p class="text-center">{{ award.description or "" }}</p>
-              <p class="text-center">{{ award.value }}</p>
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
+    {% if solves %}
       <br>
 
       <div class="row">
