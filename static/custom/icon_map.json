@@ -120,6 +120,22 @@
     {
       "id": 24,
       "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/user_world-1.png"
+    },
+    {
+      "id": 34,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/users_key-2.png"
+    },
+    {
+      "id": 35,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_dpf-1.png"
+    },
+    {
+      "id": 36,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/java_ocx-1.png"
+    },
+    {
+      "id": 37,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/spider-1.png"
     }
   ]
 }
