@@ -136,6 +136,10 @@
     {
       "id": 37,
       "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/spider-1.png"
+    },
+    {
+      "id": 38,
+      "icon_path": "/themes/uiuctf-2023-ctfd-theme/static/img/win98-icons/network_internet_pcs_installer-4.png"
     }
   ]
 }
